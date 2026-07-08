@@ -98,3 +98,11 @@ class GameMap:
         if self.map.have_no_pellet():
             _win()
         return obs, self.done, self.won
+    
+    def request_player_action(self, observation: Observation) -> Action:
+        context = {} # empty context for now
+        return self.player.request_action(observation, context)
+
+    def request_enemy_actions(self, observation: Observation) -> list[Action]:
+        context = {} # empty context for now
+        return [e.request_action(observation, context) for e in self.enemies]
