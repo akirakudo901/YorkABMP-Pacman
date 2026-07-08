@@ -11,10 +11,34 @@ can_move(x, y)
 
 from __future__ import annotations
 
+from enum import Enum
 from typing import Tuple
 
 Coord = Tuple[int, int]
 
+class Direction(Enum):
+    UP = 'U'
+    DOWN = 'D'
+    LEFT = 'L'
+    RIGHT = 'R'
+
+    def delta(self) -> Tuple[int, int]:
+        """Return (dx, dy) for this direction."""
+        if self == Direction.UP:
+            return (0, -1)
+        elif self == Direction.DOWN:
+            return (0, 1)
+        elif self == Direction.LEFT:
+            return (-1, 0)
+        elif self == Direction.RIGHT:
+            return (1, 0)
+        else:
+            raise ValueError("Unknown Direction")
+    
+    def move_towards(self, start: Coord) -> Coord:
+        dx, dy = self.delta()
+        sx, sy = start
+        return (sx + dx, sy + dy)
 
 class Map:
     
@@ -61,6 +85,13 @@ class Map:
     def can_move(self, coord: Coord) -> bool:
         x, y = coord
         return self._in_bounds(coord) and not self.wall_locs[x][y]
+    
+    def move(self, start: Coord, dir: Direction) -> Coord:
+        if not self.can_move(start):
+            raise Exception("start must be a valid starting point.")
+        
+        target = dir.move_towards(start)
+        return target if self.can_move(target) else start
     
     # Helpers related to pellets
     def add_pellets(self, coords: list[Coord]) -> None:
