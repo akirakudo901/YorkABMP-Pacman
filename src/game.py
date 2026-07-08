@@ -54,13 +54,14 @@ class GameMap:
     
     def step(self, player_action: Action, enemy_actions: list[Action]) -> None:
         def _lose():
-            self.won, self.done = False, True
+            self.done, self.won = True, False
         
         def _win():
-            self.won, self.done = True, True
+            self.done, self.won = True, True
         
         prev_player_coord = tuple(self.player.coord)
         prev_enemy_coords = [tuple(e.coord) for e in self.enemies]
+        
         # move player
         self.player.move(player_action)
         # if pellet is at the new location, consume it
@@ -68,17 +69,16 @@ class GameMap:
         if has_pellet:
             self.map.consume_pellets([self.player.coord])
             self.score += PELLET_SCORE
+        
         # move enemies
         for enemy, e_action in zip(self.enemies, enemy_actions):
             enemy.move(e_action)
         # if enemies are on top of the player, or they passed through each other, lose
         for enemy, prev_enemy_coord in zip(self.enemies, prev_enemy_coords):
-            if self.player.coord == enemy.coord:
+            if (self.player.coord == enemy.coord or \
+                self.player.coord == prev_enemy_coord and prev_player_coord == enemy.coord):
                 _lose()
-                return
-            if self.player.coord == prev_enemy_coord and prev_player_coord == enemy.coord:
-                _lose()
-                return
+                return 
         # if there's no more pellet otherwise, win
         if self.map.have_no_pellet():
             _win()
