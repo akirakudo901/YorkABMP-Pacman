@@ -10,7 +10,7 @@ Sets up the logic of the game.
 from dataclasses import dataclass
 from copy import deepcopy
 
-from entity import Entity
+from entity import Entity, Player, Enemy
 from map import Coord, Direction, Map
 
 # Mere alias for easier reading
@@ -19,14 +19,14 @@ Action = Direction
 @dataclass
 class Observation:
     map: Map
-    player: Entity
-    enemies: list[Entity]
+    player: Player
+    enemies: list[Enemy]
 
 PELLET_SCORE = 1
 
 class GameMap:
 
-    def __init__(self, map: Map, player: Entity, enemies: list[Entity]) -> None:
+    def __init__(self, map: Map, player: Player, enemies: list[Enemy]) -> None:
         self.map = map
         self.player = player
         self.enemies = enemies
@@ -40,7 +40,7 @@ class GameMap:
         
         self.reset()
     
-    def _set_initial_player_enemy_states(self, player: Entity, enemies: list[Entity]) -> None:
+    def _set_initial_player_enemy_states(self, player: Player, enemies: list[Enemy]) -> None:
         # Cloning and storing initial state for later recreation
         self.init_player_state = deepcopy(player)
         self.init_enemy_states = [deepcopy(e) for e in enemies]
