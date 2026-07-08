@@ -7,11 +7,18 @@ Sets up the logic of the game.
 - If enemy on player, lose
 """
 
+from dataclasses import dataclass
 from entity import Entity
-from map import Direction, Map
+from map import Coord, Direction, Map
 
 # Mere alias for easier reading
 Action = Direction
+
+@dataclass
+class Observation:
+    map: Map
+    player: Entity
+    enemies: list[Entity]
 
 PELLET_SCORE = 1
 
@@ -52,7 +59,7 @@ class GameMap:
         self.player = _copy_entity(self.init_player_state)
         self.enemies = [_copy_entity(e) for e in self.init_enemy_states]
     
-    def step(self, player_action: Action, enemy_actions: list[Action]) -> None:
+    def step(self, player_action: Action, enemy_actions: list[Action]) -> tuple[Observation, bool, bool]:
         def _lose():
             self.done, self.won = True, False
         
@@ -73,12 +80,21 @@ class GameMap:
         # move enemies
         for enemy, e_action in zip(self.enemies, enemy_actions):
             enemy.move(e_action)
+        
+        # create the observation
+        obs = Observation(
+            map=self.map,
+            player=_copy_entity(self.player), 
+            enemies=[_copy_entity(e) for e in self.enemies]
+        )
+        
         # if enemies are on top of the player, or they passed through each other, lose
         for enemy, prev_enemy_coord in zip(self.enemies, prev_enemy_coords):
             if (self.player.coord == enemy.coord or \
                 self.player.coord == prev_enemy_coord and prev_player_coord == enemy.coord):
                 _lose()
-                return 
+                return obs, self.done, self.won
         # if there's no more pellet otherwise, win
         if self.map.have_no_pellet():
             _win()
+        return obs, self.done, self.won
