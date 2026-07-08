@@ -53,9 +53,9 @@ class Map:
         self.size_x, self.size_y = size_x, size_y
         
         # size_x by size_y grid for where is a wall
-        self.wall_locs: list[list[bool]] = [ [[False] * size_y] * size_x ]
+        self.wall_locs: list[list[bool]] = [[False] * size_y] * size_x
         # similar matrix for location of pellets
-        self.pellet_locs: list[list[bool]] = [ [[False] * size_y] * size_x ]
+        self.pellet_locs: list[list[bool]] = [[False] * size_y] * size_x
         
         if walls:
             self.add_walls(walls)
@@ -107,4 +107,4 @@ class Map:
         self.remove_pellets(coords)
     
     def have_pellets(self, coords: list[Coord]) -> list[bool]:
-        return [self.pellet_locs[x][y] for x, y in coords]
+        return [self._in_bounds((x, y)) and self.pellet_locs[x][y] for x, y in coords]
