@@ -42,6 +42,18 @@ class Direction(Enum):
         dx, dy = self.delta()
         sx, sy = start
         return (sx + dx, sy + dy)
+    
+    @classmethod
+    def delta_to_dir(cls, coord: Coord) -> Direction:
+        """Return direction from (dx, dy) with one value being non-zero and the other 0."""
+        def sign(x):
+            return (x > 0) - (x < 0)
+        x, y = coord
+        norm_coord = sign(x), sign(y)
+        for direction in Direction:
+            if norm_coord == direction.delta():
+                return direction
+        raise ValueError("Unknown Direction")
 
 class Map:
     
