@@ -12,12 +12,16 @@ class Entity:
         self.coord = init_coord
         self.map = map
         self.dir = direction
-        
-        if not map.can_move(self.coord):
-            raise ValueError("Initial coordinate of the entity must be free in the corresponding map.")
+
+        self._validate_coord_on_map()
+    
+    def _validate_coord_on_map(self):
+        if not self.map.can_move(self.coord):
+            raise ValueError("Coordinate of the entity must be free in the corresponding map.")
     
     def set_map(self, map: Map) -> None:
         self.map = map
+        self._validate_coord_on_map()
     
     def get_map(self, map: Map) -> Map:
         return self.map
