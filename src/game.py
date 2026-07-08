@@ -82,11 +82,7 @@ class GameMap:
             enemy.move(e_action)
         
         # create the observation
-        obs = Observation(
-            map=self.map,
-            player=_copy_entity(self.player), 
-            enemies=[_copy_entity(e) for e in self.enemies]
-        )
+        obs = self.get_observation()
         
         # if enemies are on top of the player, or they passed through each other, lose
         for enemy, prev_enemy_coord in zip(self.enemies, prev_enemy_coords):
@@ -98,6 +94,13 @@ class GameMap:
         if self.map.have_no_pellet():
             _win()
         return obs, self.done, self.won
+    
+    def get_observation(self) -> Observation:
+        return Observation(
+            map=self.map,
+            player=_copy_entity(self.player), 
+            enemies=[_copy_entity(e) for e in self.enemies]
+        )
     
     def request_player_action(self, observation: Observation) -> Action:
         context = {} # empty context for now
