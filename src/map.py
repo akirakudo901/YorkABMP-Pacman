@@ -21,6 +21,7 @@ class Direction(Enum):
     DOWN = 'D'
     LEFT = 'L'
     RIGHT = 'R'
+    NEUTRAL = 'N'
 
     def delta(self) -> Tuple[int, int]:
         """Return (dx, dy) for this direction."""
@@ -32,6 +33,8 @@ class Direction(Enum):
             return (-1, 0)
         elif self == Direction.RIGHT:
             return (1, 0)
+        elif self == Direction.NEUTRAL:
+            return (0, 0)
         else:
             raise ValueError("Unknown Direction")
     
