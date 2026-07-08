@@ -8,9 +8,10 @@ from map import Coord, Direction, Map
 
 class Entity:
 
-    def __init__(self, init_coord: Coord, map: Map) -> None:
+    def __init__(self, init_coord: Coord, map: Map, direction: Direction=Direction.DOWN) -> None:
         self.coord = init_coord
         self.map = map
+        self.dir = direction
         
         if not map.can_move(self.coord):
             raise ValueError("Initial coordinate of the entity must be free in the corresponding map.")
@@ -29,6 +30,7 @@ class Entity:
         return True
 
     def move(self, dir: Direction) -> bool:
+        self.dir = dir
         target = self.map.move(start=self.coord, dir=dir)
         if self.coord != target:
             self.coord = target
