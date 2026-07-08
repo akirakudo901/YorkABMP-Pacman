@@ -21,15 +21,22 @@ class Map:
     def __init__(
         self, size_x: int=5, size_y: int=5,
         walls: list[Coord]=None,
+        pellets: list[Coord]=None,
         ) -> None:
         self.size_x, self.size_y = size_x, size_y
         
         # size_x by size_y grid for where is a wall
         self.wall_locs: list[list[bool]] = [ [[False] * size_y] * size_x ]
+        # similar matrix for location of pellets
+        self.pellet_locs: list[list[bool]] = [ [[False] * size_y] * size_x ]
         
         if walls:
             self.add_walls(walls)
         
+        if pellets:
+            self.add_pellets(pellets)
+    
+    # Helpers related to wall setttings
     def add_walls(self, walls: list[Coord]) -> None:
         self._set_grid_state(walls, True, self.wall_locs)
     
@@ -50,6 +57,20 @@ class Map:
             return False
         return True
     
+    # Helpers related to movement
     def can_move(self, coord: Coord) -> bool:
         x, y = coord
         return self._in_bounds(coord) and not self.wall_locs[x][y]
+    
+    # Helpers related to pellets
+    def add_pellets(self, coords: list[Coord]) -> None:
+        self._set_grid_state(coords, True, self.pellet_locs)
+    
+    def remove_pellets(self, coords: list[Coord]) -> None:
+        self._set_grid_state(coords, False, self.pellet_locs)
+    
+    def consume_pellets(self, coords: list[Coord]) -> None:
+        self.remove_pellets(coords)
+    
+    def have_pellets(self, coords: list[Coord]) -> list[bool]:
+        return [self.pellet_locs[x][y] for x, y in coords]
