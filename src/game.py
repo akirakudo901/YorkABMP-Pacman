@@ -8,6 +8,8 @@ Sets up the logic of the game.
 """
 
 from dataclasses import dataclass
+from copy import deepcopy
+
 from entity import Entity
 from map import Coord, Direction, Map
 
@@ -21,13 +23,6 @@ class Observation:
     enemies: list[Entity]
 
 PELLET_SCORE = 1
-
-def _copy_entity(entity: Entity) -> Entity:
-    """Copy an entity except the map which is a shallow copy, I think."""
-    return Entity(
-        init_coord=tuple(entity.coord),  
-        direction=entity.dir
-    )
 
 class GameMap:
 
@@ -47,8 +42,8 @@ class GameMap:
     
     def _set_initial_player_enemy_states(self, player: Entity, enemies: list[Entity]) -> None:
         # Cloning and storing initial state for later recreation
-        self.init_player_state = _copy_entity(player)
-        self.init_enemy_states = [_copy_entity(e) for e in enemies]
+        self.init_player_state = deepcopy(player)
+        self.init_enemy_states = [deepcopy(e) for e in enemies]
     
     def _validate_coord_on_map(self, entity: Entity) -> None:
         if not self.map.can_move(entity.coord):
@@ -59,8 +54,8 @@ class GameMap:
         self.done = False
         self.won = False
 
-        self.player = _copy_entity(self.init_player_state)
-        self.enemies = [_copy_entity(e) for e in self.init_enemy_states]
+        self.player = deepcopy(self.init_player_state)
+        self.enemies = [deepcopy(e) for e in self.init_enemy_states]
     
     def step(self, player_action: Action, enemy_actions: list[Action]) -> tuple[Observation, bool, bool]:
         def _lose():
@@ -101,8 +96,8 @@ class GameMap:
     def get_observation(self) -> Observation:
         return Observation(
             map=self.map,
-            player=_copy_entity(self.player), 
-            enemies=[_copy_entity(e) for e in self.enemies]
+            player=deepcopy(self.player), 
+            enemies=[deepcopy(e) for e in self.enemies]
         )
     
     def request_player_action(self, observation: Observation) -> Action:
