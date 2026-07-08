@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from action_requester import ActionRequester
+from action_requester.action_requester import ActionRequester
 from map import Coord, Direction, Map
 
 if TYPE_CHECKING:
