@@ -110,3 +110,6 @@ class Map:
     
     def have_pellets(self, coords: list[Coord]) -> list[bool]:
         return [self._in_bounds((x, y)) and self.pellet_locs[x][y] for x, y in coords]
+    
+    def have_no_pellet(self) -> bool:
+        return not any([any(col) for col in self.pellet_locs])
