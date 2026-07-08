@@ -111,7 +111,7 @@ class Map:
     
     # Helpers related to pellets
     def add_pellets(self, coords: list[Coord]) -> None:
-        coords = [self.can_move(c) for c in coords]
+        coords = [c for c in coords if self.can_move(c)]
         self._set_grid_state(coords, True, self.pellet_locs)
     
     def remove_pellets(self, coords: list[Coord]) -> None:
