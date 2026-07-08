@@ -66,6 +66,7 @@ class Map:
     # Helpers related to wall setttings
     def add_walls(self, walls: list[Coord]) -> None:
         self._set_grid_state(walls, True, self.wall_locs)
+        self.remove_pellets(walls)
     
     def remove_walls(self, walls: list[Coord]) -> None:
         self._set_grid_state(walls, False, self.wall_locs)
@@ -98,6 +99,7 @@ class Map:
     
     # Helpers related to pellets
     def add_pellets(self, coords: list[Coord]) -> None:
+        coords = [self.can_move(c) for c in coords]
         self._set_grid_state(coords, True, self.pellet_locs)
     
     def remove_pellets(self, coords: list[Coord]) -> None:
