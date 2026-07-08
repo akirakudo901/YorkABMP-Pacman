@@ -4,14 +4,28 @@ Any entity that moves around the map, defined by their location on it.
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+from action_requester import ActionRequester
 from map import Coord, Direction, Map
+
+if TYPE_CHECKING:
+    from game import Observation, Action
 
 class Entity:
 
-    def __init__(self, init_coord: Coord, map: Map, direction: Direction=Direction.DOWN) -> None:
+    def __init__(
+        self, 
+        init_coord: Coord, 
+        map: Map, 
+        action_requester: ActionRequester,
+        direction: Direction=Direction.DOWN,
+        ) -> None:
         self.coord = init_coord
         self.map = map
         self.dir = direction
+
+        self.action_requester = action_requester
 
         self._validate_coord_on_map()
     
@@ -41,3 +55,6 @@ class Entity:
             return True
         else:
             return False
+    
+    def request_action(self, observation: "Observation", context: dict) -> "Action":
+        return self.action_requester.request_action(observation, context)
