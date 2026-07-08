@@ -58,3 +58,33 @@ class Entity:
     
     def request_action(self, observation: "Observation", context: dict) -> "Action":
         return self.action_requester.request_action(observation, context)
+
+# Nothing special yet
+class Player(Entity):
+
+    def __init__(
+        self, 
+        init_coord: Coord, 
+        map: Map, 
+        action_requester: ActionRequester,
+        direction: Direction=Direction.DOWN,
+        ) -> None:
+        super().__init__(init_coord, map, action_requester, direction)
+
+class Enemy(Entity):
+
+    def __init__(
+        self, 
+        init_coord: Coord, 
+        map: Map,
+        action_requester: ActionRequester,
+        enemy_id: int,
+        direction: Direction=Direction.DOWN,
+        ) -> None:
+        super().__init__(init_coord, map, action_requester, direction)
+        self.enemy_id = enemy_id
+    
+    def request_action(self, observation: "Observation", context: dict) -> "Action":
+        full_context = dict(**context)
+        full_context["enemy_id"] = self.enemy_id
+        return super().request_action(observation, full_context)
