@@ -14,7 +14,7 @@ class CoordMatchGhostAI:
     def request_action(self, observation: "Observation", context: dict) -> "Action":
         if "enemy_id" not in context:
             raise Exception("Pass the enemy_id when requesting action to a ghost/enemy.")
-        enemy_id = context["enemy_id"]
+        enemy_id: int = context["enemy_id"]
         myself = observation.enemies[enemy_id]
         player = observation.player
 
@@ -26,7 +26,7 @@ class CoordMatchGhostAI:
         y_dir = Direction.delta_to_dir((0, d_y))
         # move in first direction if possible
         move_candidate_x = x_dir.move_towards(myself.coord)
-        if observation.map.can_move(move_candidate_x):
+        if x_dir != Direction.NEUTRAL and observation.map.can_move(move_candidate_x):
             return x_dir
         # otherwise move in second direction
         return y_dir
