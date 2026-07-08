@@ -26,7 +26,6 @@ def _copy_entity(entity: Entity) -> Entity:
     """Copy an entity except the map which is a shallow copy, I think."""
     return Entity(
         init_coord=tuple(entity.coord),  
-        map=entity.map, # points to the same still, but generally not an issue
         direction=entity.dir
     )
 
@@ -37,10 +36,10 @@ class GameMap:
         self.player = player
         self.enemies = enemies
         
-        # set the map appropriately
-        self.player.set_map(self.map)
+        # check the map allows these starting positions
+        self._validate_coord_on_map(self.player)
         for enemy in self.enemies:
-            enemy.set_map(self.map)
+            self._validate_coord_on_map(enemy)
 
         self._set_initial_player_enemy_states(self.player, self.enemies)
         
@@ -50,6 +49,10 @@ class GameMap:
         # Cloning and storing initial state for later recreation
         self.init_player_state = _copy_entity(player)
         self.init_enemy_states = [_copy_entity(e) for e in enemies]
+    
+    def _validate_coord_on_map(self, entity: Entity) -> None:
+        if not self.map.can_move(entity.coord):
+            raise ValueError("Coordinate of the entity must be free in the corresponding map.")
     
     def reset(self) -> None:
         self.score = 0
@@ -70,7 +73,7 @@ class GameMap:
         prev_enemy_coords = [tuple(e.coord) for e in self.enemies]
         
         # move player
-        self.player.move(player_action)
+        self.player.move(player_action, self.map)
         # if pellet is at the new location, consume it
         has_pellet = self.map.have_pellets([self.player.coord])[0]
         if has_pellet:
@@ -79,7 +82,7 @@ class GameMap:
         
         # move enemies
         for enemy, e_action in zip(self.enemies, enemy_actions):
-            enemy.move(e_action)
+            enemy.move(e_action, self.map)
         
         # create the observation
         obs = self.get_observation()

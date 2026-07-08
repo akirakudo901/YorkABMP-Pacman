@@ -16,40 +16,25 @@ class Entity:
 
     def __init__(
         self, 
-        init_coord: Coord, 
-        map: Map, 
+        init_coord: Coord,
         action_requester: ActionRequester,
         direction: Direction=Direction.DOWN,
         ) -> None:
         self.coord = init_coord
-        self.map = map
         self.dir = direction
 
         self.action_requester = action_requester
-
-        self._validate_coord_on_map()
     
-    def _validate_coord_on_map(self):
-        if not self.map.can_move(self.coord):
-            raise ValueError("Coordinate of the entity must be free in the corresponding map.")
-    
-    def set_map(self, map: Map) -> None:
-        self.map = map
-        self._validate_coord_on_map()
-    
-    def get_map(self, map: Map) -> Map:
-        return self.map
-
-    def move(self, coord: Coord) -> bool:
-        if not self.map.can_move(coord):
+    def move(self, coord: Coord, map: Map) -> bool:
+        if not map.can_move(coord):
             return False
         
         self.coord = coord
         return True
 
-    def move(self, dir: Direction) -> bool:
+    def move(self, dir: Direction, map: Map) -> bool:
         self.dir = dir
-        target = self.map.move(start=self.coord, dir=dir)
+        target = map.move(start=self.coord, dir=dir)
         if self.coord != target:
             self.coord = target
             return True
@@ -64,24 +49,22 @@ class Player(Entity):
 
     def __init__(
         self, 
-        init_coord: Coord, 
-        map: Map, 
+        init_coord: Coord,
         action_requester: ActionRequester,
         direction: Direction=Direction.DOWN,
         ) -> None:
-        super().__init__(init_coord, map, action_requester, direction)
+        super().__init__(init_coord, action_requester, direction)
 
 class Enemy(Entity):
 
     def __init__(
         self, 
-        init_coord: Coord, 
-        map: Map,
+        init_coord: Coord,
         action_requester: ActionRequester,
         enemy_id: int,
         direction: Direction=Direction.DOWN,
         ) -> None:
-        super().__init__(init_coord, map, action_requester, direction)
+        super().__init__(init_coord, action_requester, direction)
         self.enemy_id = enemy_id
     
     def request_action(self, observation: "Observation", context: dict) -> "Action":
