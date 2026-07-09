@@ -125,3 +125,55 @@ class Map:
     
     def have_no_pellet(self) -> bool:
         return not any([any(col) for col in self.pellet_locs])
+
+    # Serialization to and from ASCII
+    WALL_CHAR = "W"
+    PELLET_CHAR = "."
+    EMPTY_CHAR = " "
+
+    def map_to_ascii(self) -> str:
+        rows: list[str] = []
+        for y in range(self.size_y):
+            row: list[str] = []
+            for x in range(self.size_x):
+                if self.wall_locs[x][y]:
+                    row.append(Map.WALL_CHAR)
+                elif self.pellet_locs[x][y]:
+                    row.append(Map.PELLET_CHAR)
+                else:
+                    row.append(Map.EMPTY_CHAR)
+            rows.append("".join(row))
+        return "\n".join(rows)
+
+    @classmethod
+    def map_from_ascii(cls, ascii_repr: str) -> Map:
+        lines = [line for line in ascii_repr.splitlines() if line]
+        if not lines:
+            raise ValueError("ASCII map must contain at least one non-empty row.")
+
+        size_y = len(lines)
+        size_x = len(lines[0])
+        if size_x == 0:
+            raise ValueError("ASCII map rows must not be empty.")
+
+        walls: list[Coord] = []
+        pellets: list[Coord] = []
+        for y, line in enumerate(lines):
+            if len(line) != size_x:
+                raise ValueError(
+                    f"Row {y} has width {len(line)}, expected {size_x}."
+                )
+            for x, char in enumerate(line):
+                if char == cls.WALL_CHAR:
+                    walls.append((x, y))
+                elif char == cls.PELLET_CHAR:
+                    pellets.append((x, y))
+                elif char == cls.EMPTY_CHAR:
+                    continue
+                else:
+                    raise ValueError(
+                        f"Unknown character {char!r} at ({x}, {y}). "
+                        f"Expected {cls.WALL_CHAR!r}, {cls.PELLET_CHAR!r}, or {cls.EMPTY_CHAR!r}."
+                    )
+
+        return Map(size_x=size_x, size_y=size_y, walls=walls, pellets=pellets)
