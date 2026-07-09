@@ -19,6 +19,7 @@ def request_action(observation: Observation) -> Direction:
         pellet_dirs = []
 
         for d in Direction:
+            if d == Direction.NEUTRAL: continue
             target = d.move_towards(player.coord)
             if observation.map.can_move(target):
                 valid_dirs.append(d)
