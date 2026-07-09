@@ -42,7 +42,7 @@ def game_small_grid(control_player: bool=False):
     PLAYER_INIT_COORD = (0,0)
     ENEMY_INIT_COORDS = [
         (8,0), 
-        (8,8)
+        # (8,8)
     ]
 
     make_game(FILE, PLAYER_INIT_COORD, ENEMY_INIT_COORDS, control_player)
