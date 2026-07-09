@@ -5,7 +5,11 @@ import random
 from game import Observation
 from map import Direction
 
-# takes in an observation, and outputs a Direction object (random)
+# Takes in an observation, and outputs a Direction object (random)
+# See the ```game.py``` file for the definition & details of Observation (a bit complicated).`
+# A Direction object is one of: 
+# - Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT
+# - Direction.NEUTRAL for no input / motion
 def request_action(observation: Observation) -> Direction:
 
     player = observation.player
