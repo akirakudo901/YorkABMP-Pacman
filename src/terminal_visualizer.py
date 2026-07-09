@@ -21,6 +21,9 @@ PLAYER_CHARS = {
     "NEUTRAL": "C",
 }
 
+WALL_CHAR = "▪"
+PELLET_CHAR = "."
+
 
 def clear_terminal() -> None:
     """Clear the terminal and move the cursor to the top-left."""
@@ -92,9 +95,9 @@ class TerminalGameVisualizer:
         for x in range(game_map.size_x):
             for y in range(game_map.size_y):
                 if game_map.wall_locs[x][y]:
-                    grid[x][y] = "W"
+                    grid[x][y] = WALL_CHAR
                 elif game_map.pellet_locs[x][y]:
-                    grid[x][y] = "."
+                    grid[x][y] = PELLET_CHAR
 
         player_x, player_y = observation.player.coord
         grid[player_x][player_y] = PLAYER_CHARS.get(
