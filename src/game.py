@@ -9,13 +9,10 @@ Sets up the logic of the game.
 
 from dataclasses import dataclass
 from copy import deepcopy
-import time
 
 from entity import Entity, Player, Enemy
-from map import Coord, Direction, Map
+from map import Direction, Map
 
-from action_requester.ai import CoordMatchGhostAI
-from action_requester.controller import KeyboardController
 from terminal_visualizer import TerminalGameVisualizer
 from visualizer import GameVisualizer
 
@@ -194,32 +191,3 @@ def game_loop(
         viz.render(observation, done=True, won=won)
         viz.wait_before_close()
         viz.close()
-
-
-if __name__ == "__main__":
-    def short_hand_wall_block(x1, x2, y1, y2):
-        return [(x, y) for x in range(x1, x2+1) for y in range(y1, y2+1)]
-    
-    SIZE_X, SIZE_Y = 9,9
-
-    walls = short_hand_wall_block(1,3,1,3) + \
-            short_hand_wall_block(5,7,1,3) + \
-            short_hand_wall_block(1,3,5,7) + \
-            short_hand_wall_block(5,7,5,7)
-    pellets = list(
-        set(short_hand_wall_block(0,8,0,8)) - set(walls)
-    )
-
-    map = Map(
-        size_x=SIZE_X, size_y=SIZE_Y, 
-        walls=walls,
-        pellets=pellets,
-        )
-    
-    player = Player(init_coord=(0,0), action_requester=KeyboardController(timeout=200/1000))
-    enemies = [
-        Enemy(init_coord=(8,8), action_requester=CoordMatchGhostAI(), enemy_id=0),
-        Enemy(init_coord=(0,8), action_requester=CoordMatchGhostAI(), enemy_id=1)
-    ]
-    
-    game_loop(map=map, player=player, enemies=enemies, delay_ms=200, visualizer="terminal")
