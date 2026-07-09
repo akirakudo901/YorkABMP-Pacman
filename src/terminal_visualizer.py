@@ -24,6 +24,19 @@ PLAYER_CHARS = {
 WALL_CHAR = "▪"
 PELLET_CHAR = "."
 
+RESET = "\033[0m"
+COLOR_PLAYER = "\033[93m"  # bright yellow
+ENEMY_COLORS = (
+    "\033[91m",  # red
+    "\033[96m",  # cyan
+    "\033[93m",  # yellow
+    "\033[95m",  # pink (bright magenta)
+)
+
+
+def _colored(text: str, color: str) -> str:
+    return f"{color}{text}{RESET}"
+
 
 def clear_terminal() -> None:
     """Clear the terminal and move the cursor to the top-left."""
@@ -100,14 +113,13 @@ class TerminalGameVisualizer:
                     grid[x][y] = PELLET_CHAR
 
         player_x, player_y = observation.player.coord
-        grid[player_x][player_y] = PLAYER_CHARS.get(
-            observation.player.dir.name,
-            "C",
-        )
+        player_char = PLAYER_CHARS.get(observation.player.dir.name, "C")
+        grid[player_x][player_y] = _colored(player_char, COLOR_PLAYER)
 
         for enemy in observation.enemies:
             enemy_x, enemy_y = enemy.coord
-            grid[enemy_x][enemy_y] = str(enemy.enemy_id)
+            color = ENEMY_COLORS[enemy.enemy_id % len(ENEMY_COLORS)]
+            grid[enemy_x][enemy_y] = _colored(str(enemy.enemy_id), color)
 
         return grid
 
