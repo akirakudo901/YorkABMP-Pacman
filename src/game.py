@@ -9,9 +9,15 @@ Sets up the logic of the game.
 
 from dataclasses import dataclass
 from copy import deepcopy
+import time
 
 from entity import Entity, Player, Enemy
 from map import Coord, Direction, Map
+
+from action_requester.ai import CoordMatchGhostAI
+from action_requester.controller import KeyboardController
+from terminal_visualizer import TerminalGameVisualizer
+from visualizer import GameVisualizer
 
 # Mere alias for easier reading
 Action = Direction
@@ -105,5 +111,115 @@ class GameMap:
         return self.player.request_action(observation, context)
 
     def request_enemy_actions(self, observation: Observation) -> list[Action]:
-        context = {} # empty context for now
-        return [e.request_action(observation, context) for e in self.enemies]
+        # add context for lookahead steps
+        lookahead_sizes = [-3, 3, 1, -1]
+        lookahead_sizes = lookahead_sizes[:len(self.enemies)]
+        return [e.request_action(observation, {"lookahead_size": lasz}) 
+                for e, lasz in zip(self.enemies, lookahead_sizes)]
+
+def visualize_coord_lists_to_ascii(walls: list[tuple[int, int]], pellets: list[tuple[int, int]], size_x: int, size_y: int) -> None:
+    """Visualize walls and pellets in ASCII.
+    W = wall, . = pellet, ' ' = empty.
+    (0, 0) at top-left, increasing y is down.
+    """
+    wall_set = set(walls)
+    pellet_set = set(pellets)
+    for y in range(size_y):
+        row = []
+        for x in range(size_x):
+            if (x, y) in wall_set:
+                row.append("W")
+            elif (x, y) in pellet_set:
+                row.append(".")
+            else:
+                row.append(" ")
+        print("".join(row))
+
+
+def _create_visualizer(kind: str, game_map: GameMap, delay_ms: int):
+    if kind == "tk":
+        return GameVisualizer(game_map, delay_ms=delay_ms)
+    if kind == "terminal":
+        return TerminalGameVisualizer(game_map, delay_ms=delay_ms)
+    return None
+
+
+def game_loop(
+    map: Map,
+    player: Player,
+    enemies: list[Enemy],
+    visualizer: str | bool = "tk",
+) -> None:
+    DELAY_MS = 50
+    if visualizer is True:
+        visualizer = "tk"
+    elif visualizer is False:
+        visualizer = "none"
+
+    game_map = GameMap(map, player, enemies)
+
+    observation = game_map.get_observation()
+    done, won = False, False
+    viz = _create_visualizer(visualizer, game_map, DELAY_MS)
+
+    print("="*20)
+    print("Starting a game!")
+    print("="*20)
+
+    if viz and not viz.render(observation):
+        viz.close()
+        return
+
+    while not done:
+        # request actions based on the current observation
+        player_action = game_map.request_player_action(observation)
+        enemy_actions = game_map.request_enemy_actions(observation)
+        # take a step
+        new_obs, done, won = game_map.step(player_action, enemy_actions)
+
+        observation = new_obs
+
+        if viz and not viz.render(observation, done=done, won=won):
+            break
+
+        if DELAY_MS > 0:
+            time.sleep(DELAY_MS / 1000)
+    
+    print("="*20)
+    print(f"Player {'won!' if won else 'lost...'}")
+    print(f"- Score: {game_map.score}")
+    print("="*20)
+
+    if viz:
+        viz.render(observation, done=True, won=won)
+        viz.wait_before_close()
+        viz.close()
+
+
+if __name__ == "__main__":
+    def short_hand_wall_block(x1, x2, y1, y2):
+        return [(x, y) for x in range(x1, x2+1) for y in range(y1, y2+1)]
+    
+    SIZE_X, SIZE_Y = 9,9
+
+    walls = short_hand_wall_block(1,3,1,3) + \
+            short_hand_wall_block(5,7,1,3) + \
+            short_hand_wall_block(1,3,5,7) + \
+            short_hand_wall_block(5,7,5,7)
+    pellets = list(
+        set(short_hand_wall_block(0,8,0,8)) - set(walls)
+    )
+
+    map = Map(
+        size_x=SIZE_X, size_y=SIZE_Y, 
+        walls=walls,
+        pellets=pellets,
+        )
+    
+    player = Player(init_coord=(0,0), action_requester=KeyboardController())
+    enemies = [
+        Enemy(init_coord=(8,8), action_requester=CoordMatchGhostAI(), enemy_id=0),
+        Enemy(init_coord=(0,8), action_requester=CoordMatchGhostAI(), enemy_id=1)
+    ]
+    
+    game_loop(map=map, player=player, enemies=enemies, visualizer="terminal")
