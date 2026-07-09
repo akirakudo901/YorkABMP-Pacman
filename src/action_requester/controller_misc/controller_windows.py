@@ -5,7 +5,7 @@ Windows keyboard input using msvcrt.
 import msvcrt
 from typing import Optional
 
-from action_requester.controller.controller_base import KeyboardControllerBase
+from action_requester.controller_misc.controller_base import KeyboardControllerBase
 
 # Scan codes for arrow keys (second byte after b'\x00' or b'\xe0').
 _ARROW_SCAN_CODES = {
