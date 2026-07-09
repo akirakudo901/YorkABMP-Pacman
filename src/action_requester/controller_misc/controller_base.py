@@ -32,8 +32,10 @@ class KeyboardControllerBase:
         'D': Direction.LEFT,
     }
 
-    def __init__(self):
-        pass
+    def __init__(self, timeout: float | None = None):
+        if timeout is not None and timeout <= 0:
+            raise ValueError("timeout must be positive")
+        self.timeout = timeout
 
     def request_action(self, observation: "Observation", context: dict) -> "Action":
         return self.get_direction()
@@ -43,8 +45,9 @@ class KeyboardControllerBase:
 
     def get_direction(self) -> Direction:
         """
-        Blocks for a keypress and returns one of 'UP', 'DOWN', 'LEFT', 'RIGHT', or 'NEUTRAL'.
-        Accepts both WASD and arrow keys.
+        Waits for a keypress and returns one of 'UP', 'DOWN', 'LEFT', 'RIGHT', or 'NEUTRAL'.
+        Accepts both WASD and arrow keys. If timeout is set and no key is pressed in time,
+        returns NEUTRAL.
         """
         key = self.get_key()
         if key is None:

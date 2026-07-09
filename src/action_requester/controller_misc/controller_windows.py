@@ -3,6 +3,7 @@ Windows keyboard input using msvcrt.
 """
 
 import msvcrt
+import time
 from typing import Optional
 
 from action_requester.controller_misc.controller_base import KeyboardControllerBase
@@ -22,6 +23,13 @@ class KeyboardController(KeyboardControllerBase):
         Reads a single keystroke from stdin. Returns the character pressed,
         or None if not recognized.
         """
+        if self.timeout is not None:
+            deadline = time.monotonic() + self.timeout
+            while not msvcrt.kbhit():
+                if time.monotonic() >= deadline:
+                    return None
+                time.sleep(0.01)
+
         ch = msvcrt.getch()
         if ch in (b'\x00', b'\xe0'):
             ch2 = msvcrt.getch()

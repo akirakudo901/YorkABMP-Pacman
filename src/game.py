@@ -148,9 +148,9 @@ def game_loop(
     map: Map,
     player: Player,
     enemies: list[Enemy],
+    delay_ms: int = 50,
     visualizer: str | bool = "tk",
 ) -> None:
-    DELAY_MS = 50
     if visualizer is True:
         visualizer = "tk"
     elif visualizer is False:
@@ -160,7 +160,7 @@ def game_loop(
 
     observation = game_map.get_observation()
     done, won = False, False
-    viz = _create_visualizer(visualizer, game_map, DELAY_MS)
+    viz = _create_visualizer(visualizer, game_map, delay_ms)
 
     print("="*20)
     print("Starting a game!")
@@ -182,8 +182,8 @@ def game_loop(
         if viz and not viz.render(observation, done=done, won=won):
             break
 
-        if DELAY_MS > 0:
-            time.sleep(DELAY_MS / 1000)
+        # if delay_ms > 0:
+        #     time.sleep(delay_ms / 1000)
     
     print("="*20)
     print(f"Player {'won!' if won else 'lost...'}")
@@ -216,10 +216,10 @@ if __name__ == "__main__":
         pellets=pellets,
         )
     
-    player = Player(init_coord=(0,0), action_requester=KeyboardController())
+    player = Player(init_coord=(0,0), action_requester=KeyboardController(timeout=200/1000))
     enemies = [
         Enemy(init_coord=(8,8), action_requester=CoordMatchGhostAI(), enemy_id=0),
         Enemy(init_coord=(0,8), action_requester=CoordMatchGhostAI(), enemy_id=1)
     ]
     
-    game_loop(map=map, player=player, enemies=enemies, visualizer="terminal")
+    game_loop(map=map, player=player, enemies=enemies, delay_ms=200, visualizer="terminal")

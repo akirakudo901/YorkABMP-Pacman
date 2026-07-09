@@ -2,6 +2,7 @@
 macOS / POSIX keyboard input using termios.
 """
 
+import select
 import sys
 import termios
 import tty
@@ -20,6 +21,10 @@ class KeyboardController(KeyboardControllerBase):
         old_settings = termios.tcgetattr(fd)
         try:
             tty.setraw(fd)
+            if self.timeout is not None:
+                ready, _, _ = select.select([sys.stdin], [], [], self.timeout)
+                if not ready:
+                    return None
             ch = sys.stdin.read(1)
             if ch == '\x1b':
                 ch2 = sys.stdin.read(1)
