@@ -35,3 +35,10 @@ class CoordMatchGhostAI:
             return x_dir
         # otherwise move in second direction
         return y_dir
+
+from rules import request_action as request_action_phoebe
+
+class PhoebePlayerAI:
+
+    def request_action(self, observation: "Observation", context: dict) -> "Action":
+        return request_action_phoebe(observation)
