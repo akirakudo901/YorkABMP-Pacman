@@ -13,7 +13,7 @@ def test_SITUATION_NAME_SUCH_AS_move_towards_the_current_direction():
 .WWW.
 .....
 """
-     # x increases to the right, y downwards
+    # x increases to the right, y downwards
     #  so (0,0) is the top left corner
     PLAYER_INIT_COORD = (0,0)
     ENEMY_INIT_COORDS = [
@@ -21,7 +21,6 @@ def test_SITUATION_NAME_SUCH_AS_move_towards_the_current_direction():
         ]
     
     # create the initial map situation containing the trigger we want to explore
-    # in this case: maybe the big pellet is very close
     init_map = Map.map_from_ascii(ascii_repr=initial_map_ascii)
 
     # create player with appropriate action requester AI of choice
@@ -37,6 +36,7 @@ def test_SITUATION_NAME_SUCH_AS_move_towards_the_current_direction():
     game_map = GameMap(init_map, player, enemies)
     # optionally attach a terminal visualizer to see the current state in the terminal
     tgv = TerminalGameVisualizer(game_map, delay_ms=0)
+    # strictly optional visualization of result, useful for human intuition
     print("Initial map state:")
     tgv.render() # see what's current
 
@@ -50,8 +50,9 @@ def test_SITUATION_NAME_SUCH_AS_move_towards_the_current_direction():
     new_obs, _done, _won = game_map.step(player_action, enemy_actions)
 
     # then you wanna check what's happening in the new observation - is it as expected?
-    
 
+    
+    # strictly optional visualization of result, useful for human intuition
     print("Obtained map state:")
     tgv.render()
 
