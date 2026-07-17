@@ -6,11 +6,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from action_requester.action_requester import ActionRequester
-from map import Coord, Direction, Map
+from src.action_requester.action_requester import ActionRequester
+from src.map import Coord, Direction, Map
 
 if TYPE_CHECKING:
-    from game import Observation, Action
+    from src.game import Observation, Action
 
 class Entity:
 

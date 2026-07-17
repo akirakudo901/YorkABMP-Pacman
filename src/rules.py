@@ -2,8 +2,8 @@
 # direction with pellet nearby are preferred
 
 import random
-from game import Observation
-from map import Direction
+from src.game import Observation
+from src.map import Direction
 
 # Takes in an observation, and outputs a Direction object (random)
 # See the ```game.py``` file for the definition & details of Observation (a bit complicated).`

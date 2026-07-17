@@ -9,7 +9,7 @@ import tkinter as tk
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from game import GameMap, Observation
+    from src.game import GameMap, Observation
 
 # Classic-inspired palette
 COLOR_BACKGROUND = "#000000"

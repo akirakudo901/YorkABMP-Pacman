@@ -10,11 +10,11 @@ Sets up the logic of the game.
 from dataclasses import dataclass
 from copy import deepcopy
 
-from entity import Entity, Player, Enemy
-from map import Direction, Map
+from src.entity import Entity, Player, Enemy
+from src.map import Direction, Map
 
-from terminal_visualizer import TerminalGameVisualizer
-from visualizer import GameVisualizer
+from src.terminal_visualizer import TerminalGameVisualizer
+from src.visualizer import GameVisualizer
 
 # Mere alias for easier reading
 Action = Direction

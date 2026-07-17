@@ -8,7 +8,7 @@ import termios
 import tty
 from typing import Optional
 
-from action_requester.controller_misc.controller_base import KeyboardControllerBase
+from src.action_requester.controller_misc.controller_base import KeyboardControllerBase
 
 
 class KeyboardController(KeyboardControllerBase):

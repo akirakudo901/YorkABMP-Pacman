@@ -4,10 +4,10 @@ A simple rule-based AI for the ghosts and player.
 
 from typing import TYPE_CHECKING
 
-from map import Direction
+from src.map import Direction
 
 if TYPE_CHECKING:
-    from game import Observation, Action
+    from src.game import Observation, Action
 
 class CoordMatchGhostAI:
 
@@ -36,7 +36,7 @@ class CoordMatchGhostAI:
         # otherwise move in second direction
         return y_dir
 
-from rules import request_action as request_action_phoebe
+from src.rules import request_action as request_action_phoebe
 
 class PhoebePlayerAI:
 

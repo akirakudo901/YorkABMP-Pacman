@@ -2,11 +2,11 @@
 File for playing a game!
 """
 
-from entity import Enemy, Player
-from game import game_loop
-from map import Coord, Map
-from action_requester.ai import CoordMatchGhostAI, PhoebePlayerAI
-from action_requester.controller import KeyboardController
+from src.entity import Enemy, Player
+from src.game import game_loop
+from src.map import Coord, Map
+from src.action_requester.ai import CoordMatchGhostAI, PhoebePlayerAI
+from src.action_requester.controller import KeyboardController
 
 KEYBOARD_TIMEOUT_MS = 200
 DELAY_MS = 200

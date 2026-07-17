@@ -6,7 +6,7 @@ import msvcrt
 import time
 from typing import Optional
 
-from action_requester.controller_misc.controller_base import KeyboardControllerBase
+from src.action_requester.controller_misc.controller_base import KeyboardControllerBase
 
 # Scan codes for arrow keys (second byte after b'\x00' or b'\xe0').
 _ARROW_SCAN_CODES = {

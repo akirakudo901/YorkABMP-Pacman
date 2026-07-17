@@ -4,10 +4,10 @@ Shared keyboard controller logic for Pacman.
 
 from typing import TYPE_CHECKING, Optional
 
-from map import Direction
+from src.map import Direction
 
 if TYPE_CHECKING:
-    from game import Observation, Action
+    from src.game import Observation, Action
 
 
 class KeyboardControllerBase:
