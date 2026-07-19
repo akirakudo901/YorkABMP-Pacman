@@ -32,7 +32,8 @@ def request_action(observation: Observation) -> Direction:
         player_mode = player.get_mode()
 
     # Switch between "modes" based on triggers!
-    
+    if is_ghost_nearby(observation, danger_dist=3):
+        player.set_mode(IN_DANGER_MODE_NAME)
 
     # we run the logic under the different states
     if player_mode == RUSH_MODE_NAME:
