@@ -88,15 +88,19 @@ class Enemy(Entity):
 
     def __init__(
         self, 
-        init_coord: Coord,
-        action_requester: ActionRequester,
+        *args,
         enemy_id: int,
-        direction: Direction=Direction.DOWN,
+        lookahead_size: int=0,
+        **kwargs
         ) -> None:
-        super().__init__(init_coord, action_requester, direction)
+        super().__init__(*args, **kwargs)
+
         self.enemy_id = enemy_id
+        self.lookahead_size = lookahead_size
     
     def request_action(self, observation: "Observation", context: dict) -> "Action":
         full_context = dict(**context)
         full_context["enemy_id"] = self.enemy_id
+        full_context["lookahead_size"] = self.lookahead_size
+        
         return super().request_action(observation, full_context)

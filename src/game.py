@@ -108,11 +108,8 @@ class GameMap:
         return self.player.request_action(observation, context)
 
     def request_enemy_actions(self, observation: Observation) -> list[Action]:
-        # add context for lookahead steps
-        lookahead_sizes = [-3, 3, 1, -1]
-        lookahead_sizes = lookahead_sizes[:len(self.enemies)]
-        return [e.request_action(observation, {"lookahead_size": lasz}) 
-                for e, lasz in zip(self.enemies, lookahead_sizes)]
+        context = {} # empty context for now
+        return [e.request_action(observation, context) for e in self.enemies]
 
 
 def _create_visualizer(kind: str, game_map: GameMap, delay_ms: int):

@@ -12,10 +12,13 @@ KEYBOARD_TIMEOUT_MS = 200
 DELAY_MS = 200
 VIS_FORMAT = "terminal"
 
+DEFAULT_ENEMY_LOOKAHEAD_SIZES = [-3, 3, 1, -1]
+
 def make_game(
     map_file_path: str, 
     player_init_coord: Coord,
     enemy_init_coords: list[Coord],
+    enemy_lookahead_sizes: list[int]=DEFAULT_ENEMY_LOOKAHEAD_SIZES,
     control_player: bool=False
     ):
     with open(map_file_path, 'r') as f:
@@ -29,10 +32,13 @@ def make_game(
         )
     else:
         player = Player(init_coord=player_init_coord, action_requester=PhoebePlayerAI())
-        
+    
+    enemy_lookahead_sizes = enemy_lookahead_sizes + [0] * len(enemy_init_coords)
+    enemy_lookahead_sizes = enemy_lookahead_sizes[:len(enemy_init_coords)]
     enemies = [
-        Enemy(init_coord=coord, action_requester=CoordMatchGhostAI(), enemy_id=i)
-        for i, coord in enumerate(enemy_init_coords)
+        Enemy(init_coord=coord, action_requester=CoordMatchGhostAI(), 
+              enemy_id=i, lookahead_size=lsz)
+        for i, (coord, lsz) in enumerate(zip(enemy_init_coords, enemy_lookahead_sizes))
     ]
     
     game_loop(map=map, player=player, enemies=enemies, delay_ms=200, visualizer=VIS_FORMAT)
