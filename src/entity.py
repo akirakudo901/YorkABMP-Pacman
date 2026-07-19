@@ -60,8 +60,15 @@ class Player(Entity):
 
         self.super_pacman_len = super_pacman_len
         self.super_pacman_countdown = 0
+        self.mode = "" # mode to use for finite state machine-style mode switching
 
         self._validate_super_pacman_length()
+    
+    def set_mode(self, mode_name: str) -> None:
+        self.mode = mode_name
+    
+    def get_mode(self) -> str:
+        return self.mode
     
     def _validate_super_pacman_length(self):
         if type(self.super_pacman_len) != int:
