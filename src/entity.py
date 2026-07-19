@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     from src.game import Observation, Action
 
 DEFAULT_SUPER_PACMAN_LEN = 30
+DEFAULT_ENEMY_DEATH_LEN = 30
 
 class Entity:
 
@@ -91,12 +92,38 @@ class Enemy(Entity):
         *args,
         enemy_id: int,
         lookahead_size: int=0,
+        death_len: int=DEFAULT_ENEMY_DEATH_LEN,
         **kwargs
         ) -> None:
         super().__init__(*args, **kwargs)
 
         self.enemy_id = enemy_id
         self.lookahead_size = lookahead_size
+        
+        self.death_len = death_len
+        self.revive_countdown = 0
+
+        self._validate_death_length()
+    
+    def _validate_death_length(self):
+        if type(self.death_len) != int:
+            raise ValueError(f"self.death_len should be of type int, got {type(self.death_len)}")
+        if self.death_len < 0:
+            raise ValueError(f"self.death_len should be at least 0, got {self.death_len}")
+    
+    def set_death_length(self, length: int) -> None:
+        self.death_len = length
+        self._validate_death_length()
+
+    def kill(self) -> None:
+        self.revive_countdown = self.death_len
+    
+    def is_dead(self) -> bool:
+        return self.revive_countdown > 0
+    
+    def tick(self) -> None:
+        """Function for 'ticking' any time-based functionality."""
+        self.revive_countdown = max(self.revive_countdown - 1, 0)
     
     def request_action(self, observation: "Observation", context: dict) -> "Action":
         full_context = dict(**context)
