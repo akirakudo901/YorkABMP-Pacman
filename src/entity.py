@@ -12,6 +12,8 @@ from src.map import Coord, Direction, Map
 if TYPE_CHECKING:
     from src.game import Observation, Action
 
+DEFAULT_SUPER_PACMAN_LEN = 30
+
 class Entity:
 
     def __init__(
@@ -44,16 +46,43 @@ class Entity:
     def request_action(self, observation: "Observation", context: dict) -> "Action":
         return self.action_requester.request_action(observation, context)
 
-# Nothing special yet
+
 class Player(Entity):
 
     def __init__(
         self, 
-        init_coord: Coord,
-        action_requester: ActionRequester,
-        direction: Direction=Direction.DOWN,
+        *args, 
+        super_pacman_len: int=DEFAULT_SUPER_PACMAN_LEN,
+        **kwargs
         ) -> None:
-        super().__init__(init_coord, action_requester, direction)
+        super().__init__(*args, **kwargs)
+
+        self.super_pacman_len = super_pacman_len
+        self.super_pacman_countdown = 0
+
+        self._validate_super_pacman_length()
+    
+    def _validate_super_pacman_length(self):
+        if type(self.super_pacman_len) != int:
+            raise ValueError(f"self.super_pacman_len should be of type int, got {type(self.super_pacman_len)}")
+        if self.super_pacman_len < 0:
+            raise ValueError(f"self.super_pacman_len should be at least 0, got {self.super_pacman_len}")
+    
+    def set_super_pacman_length(self, length: int) -> None:
+        self.super_pacman_len = length
+        self._validate_super_pacman_length()
+
+    def start_super_pacman_mode(self) -> None:
+        self.super_pacman_countdown = self.super_pacman_len
+    
+    def is_super_pacman_mode(self) -> bool:
+        # check if self.super_pacman_countdown is greater than 0
+        return self.super_pacman_countdown > 0
+    
+    def tick(self) -> None:
+        """Function for 'ticking' any time-based functionality."""
+        self.super_pacman_countdown = max(self.super_pacman_countdown - 1, 0)
+
 
 class Enemy(Entity):
 
