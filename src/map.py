@@ -61,19 +61,26 @@ class Map:
         self, size_x: int=5, size_y: int=5,
         walls: list[Coord]=None,
         pellets: list[Coord]=None,
+        power_pellets: list[Coord]=None,
         ) -> None:
+        """Note that if one coordinate is covered by both a pellet and power pellet, the power pellet take precedence."""
         self.size_x, self.size_y = size_x, size_y
         
         # size_x by size_y grid for where is a wall
         self.wall_locs: list[list[bool]] = [[False for _ in range(size_y)] for _ in range(size_x)]
         # similar matrix for location of pellets
         self.pellet_locs: list[list[bool]] = [[False for _ in range(size_y)] for _ in range(size_x)]
+        # another matrix for location of "power pellets"
+        self.power_pellet_locs: list[list[bool]] = [[False for _ in range(size_y)] for _ in range(size_x)]
         
         if walls:
             self.add_walls(walls)
         
         if pellets:
             self.add_pellets(pellets)
+        
+        if power_pellets:
+            self.add_power_pellets(power_pellets)
     
     # Helpers related to wall setttings
     def add_walls(self, walls: list[Coord]) -> None:
@@ -111,24 +118,48 @@ class Map:
     
     # Helpers related to pellets
     def add_pellets(self, coords: list[Coord]) -> None:
+        """Overrides any power pellet existing at the locations."""
         coords = [c for c in coords if self.can_move(c)]
-        self._set_grid_state(coords, True, self.pellet_locs)
+        self._set_grid_state(coords, True,        self.pellet_locs)
+        self._set_grid_state(coords, False, self.power_pellet_locs)
+    
+    def add_power_pellets(self, coords: list[Coord]) -> None:
+        """Overrides any normal pellet existing at the locations."""
+        coords = [c for c in coords if self.can_move(c)]
+        self._set_grid_state(coords, True,  self.power_pellet_locs)
+        self._set_grid_state(coords, False,       self.pellet_locs)
     
     def remove_pellets(self, coords: list[Coord]) -> None:
+        """Remove all pellets, normal or power."""
         self._set_grid_state(coords, False, self.pellet_locs)
+        self._set_grid_state(coords, False, self.power_pellet_locs)
     
     def consume_pellets(self, coords: list[Coord]) -> None:
+        """Remove all pellets, normal or power."""
         self.remove_pellets(coords)
     
     def have_pellets(self, coords: list[Coord]) -> list[bool]:
+        """Have any kind of pellet at each coord, normal or power."""
+        return [
+            self._in_bounds((x, y)) and (self.pellet_locs[x][y] or self.power_pellet_locs[x][y])
+            for x, y in coords
+            ]
+
+    def have_normal_pellets(self, coords: list[Coord]) -> list[bool]:
         return [self._in_bounds((x, y)) and self.pellet_locs[x][y] for x, y in coords]
     
+    def have_power_pellets(self, coords: list[Coord]) -> list[bool]:
+        return [self._in_bounds((x, y)) and self.power_pellet_locs[x][y] for x, y in coords]
+    
     def have_no_pellet(self) -> bool:
-        return not any([any(col) for col in self.pellet_locs])
+        """Have no pellet, normal or power."""
+        return not any([any(col) for col in self.pellet_locs]) and \
+               not any([any(col) for col in self.power_pellet_locs])
 
     # Serialization to and from ASCII
     WALL_CHAR = "W"
     PELLET_CHAR = "."
+    POWER_PELLET_CHAR = "O"
     EMPTY_CHAR = " "
 
     def map_to_ascii(self) -> str:
@@ -140,6 +171,8 @@ class Map:
                     row.append(Map.WALL_CHAR)
                 elif self.pellet_locs[x][y]:
                     row.append(Map.PELLET_CHAR)
+                elif self.power_pellet_locs[x][y]:
+                    row.append(Map.POWER_PELLET_CHAR)
                 else:
                     row.append(Map.EMPTY_CHAR)
             rows.append("".join(row))
@@ -158,6 +191,7 @@ class Map:
 
         walls: list[Coord] = []
         pellets: list[Coord] = []
+        power_pellets: list[Coord] = []
         for y, line in enumerate(lines):
             if len(line) != size_x:
                 raise ValueError(
@@ -168,6 +202,8 @@ class Map:
                     walls.append((x, y))
                 elif char == cls.PELLET_CHAR:
                     pellets.append((x, y))
+                elif char == cls.POWER_PELLET_CHAR:
+                    power_pellets.append((x, y))
                 elif char == cls.EMPTY_CHAR:
                     continue
                 else:
