@@ -44,21 +44,21 @@ def make_game(
     game_loop(map=map, player=player, enemies=enemies, delay_ms=200, visualizer=VIS_FORMAT)
 
 def game_small_grid(control_player: bool=False):
-    FILE = "../maps/9x9grid.txt"
+    FILE = "maps/9x9grid.txt"
     PLAYER_INIT_COORD = (0,0)
     ENEMY_INIT_COORDS = [
         (8,0), 
         # (8,8)
     ]
 
-    make_game(FILE, PLAYER_INIT_COORD, ENEMY_INIT_COORDS, control_player)
+    make_game(FILE, PLAYER_INIT_COORD, ENEMY_INIT_COORDS, control_player=control_player)
 
 def game_original_pacman(control_player: bool=False):
-    FILE = "../maps/orig_pacman_no_power_pellet.txt"
+    FILE = "maps/orig_pacman_with_power_pellet.txt"
     PLAYER_INIT_COORD = (0,0)
     ENEMY_INIT_COORDS = [(0,28), (25,28)]
 
-    make_game(FILE, PLAYER_INIT_COORD, ENEMY_INIT_COORDS, control_player)
+    make_game(FILE, PLAYER_INIT_COORD, ENEMY_INIT_COORDS, control_player=control_player)
 
 
 if __name__ == "__main__":
