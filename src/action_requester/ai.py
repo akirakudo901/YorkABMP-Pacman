@@ -18,6 +18,11 @@ class CoordMatchGhostAI:
         lookahead_size = context.get("lookahead_size", 0)
         
         myself = observation.enemies[enemy_id]
+
+        # simple reeturn if dead
+        if myself.is_dead():
+            return Direction.NEUTRAL
+        
         player = observation.player
 
         m_x, m_y = myself.coord
@@ -27,6 +32,9 @@ class CoordMatchGhostAI:
         g_x, g_y = p_x + lookahead_size * p_dir_x, p_y + lookahead_size * p_dir_y
         # check general direction of player relative to current position
         d_x, d_y = (g_x - m_x), (g_y - m_y)
+        # if the player is in super pacman mode, simply go the other way (flee)
+        if player.is_super_pacman_mode():
+            d_x, d_y = -d_x, -d_y
         x_dir = Direction.delta_to_dir((d_x, 0))
         y_dir = Direction.delta_to_dir((0, d_y))
         # move in first direction if possible
