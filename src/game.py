@@ -114,24 +114,6 @@ class GameMap:
         return [e.request_action(observation, {"lookahead_size": lasz}) 
                 for e, lasz in zip(self.enemies, lookahead_sizes)]
 
-def visualize_coord_lists_to_ascii(walls: list[tuple[int, int]], pellets: list[tuple[int, int]], size_x: int, size_y: int) -> None:
-    """Visualize walls and pellets in ASCII.
-    W = wall, . = pellet, ' ' = empty.
-    (0, 0) at top-left, increasing y is down.
-    """
-    wall_set = set(walls)
-    pellet_set = set(pellets)
-    for y in range(size_y):
-        row = []
-        for x in range(size_x):
-            if (x, y) in wall_set:
-                row.append("W")
-            elif (x, y) in pellet_set:
-                row.append(".")
-            else:
-                row.append(" ")
-        print("".join(row))
-
 
 def _create_visualizer(kind: str, game_map: GameMap, delay_ms: int):
     if kind == "tk":
