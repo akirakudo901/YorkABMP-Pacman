@@ -198,9 +198,13 @@ def game_loop(
     print("Starting a game!")
     print("="*20)
 
-    if viz and not viz.render(observation):
-        viz.close()
-        return
+    if viz:
+        show_countdown = getattr(viz, "show_countdown", None)
+        if callable(show_countdown):
+            show_countdown(observation)
+        if not viz.render(observation):
+            viz.close()
+            return
 
     while not done:
         # request actions based on the current observation
