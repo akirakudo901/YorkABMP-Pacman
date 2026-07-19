@@ -18,12 +18,11 @@ class CoordMatchGhostAI:
         lookahead_size = context.get("lookahead_size", 0)
         
         myself = observation.enemies[enemy_id]
-
-        # simple reeturn if dead
-        if myself.is_dead():
-            return Direction.NEUTRAL
-        
         player = observation.player
+
+        # simple reeturn if dead or every odd frame for super countdown
+        if myself.is_dead() or player.get_super_pacman_countdown() % 2 == 1:
+            return Direction.NEUTRAL
 
         m_x, m_y = myself.coord
         p_x, p_y = player.coord
