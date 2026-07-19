@@ -1,6 +1,6 @@
 ............WW............
 .WWWW.WWWWW.WW.WWWWW.WWWW.
-0WWWW.WWWWW.WW.WWWWW.WWWW0
+OWWWW.WWWWW.WW.WWWWW.WWWWO
 .WWWW.WWWWW.WW.WWWWW.WWWW.
 ..........................
 .WWWW.WW.WWWWWWWW.WW.WWWW.
@@ -20,7 +20,7 @@ WWWWW.WW.WWWWWWWW.WW.WWWWW
 ............WW............
 .WWWW.WWWWW.WW.WWWWW.WWWW.
 .WWWW.WWWWW.WW.WWWWW.WWWW.
-0..WW................WW..0
+O..WW................WW..O
 WW.WW.WW.WWWWWWWW.WW.WW.WW
 WW.WW.WW.WWWWWWWW.WW.WW.WW
 ......WW....WW....WW......
