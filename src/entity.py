@@ -80,6 +80,9 @@ class Player(Entity):
         # check if self.super_pacman_countdown is greater than 0
         return self.super_pacman_countdown > 0
     
+    def get_super_pacman_countdown(self) -> int:
+        return self.super_pacman_countdown
+    
     def tick(self) -> None:
         """Function for 'ticking' any time-based functionality."""
         self.super_pacman_countdown = max(self.super_pacman_countdown - 1, 0)
@@ -120,6 +123,9 @@ class Enemy(Entity):
     
     def is_dead(self) -> bool:
         return self.revive_countdown > 0
+    
+    def get_revive_countdown(self) -> int:
+        return self.revive_countdown
     
     def tick(self) -> None:
         """Function for 'ticking' any time-based functionality."""
