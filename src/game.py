@@ -94,6 +94,7 @@ class GameMap:
 
     
     def step(self, player_action: Action, enemy_actions: list[Action]) -> tuple[Observation, bool, bool]:
+        """Returns: observation: Observation, done: bool, won: bool"""
         def _lose():
             self.done, self.won = True, False
         
@@ -124,15 +125,13 @@ class GameMap:
             if not enemy.is_dead():
                 enemy.move(e_action, self.map)
         
-        # create the observation
-        obs = self.get_observation()
-        
         # identify collisions
         collisions = self._identify_enemy_player_collision(prev_player_coord, prev_enemy_coords)
         # if not in super pacman mode, lose if we collided
         if not self.player.is_super_pacman_mode():
             if any(collisions): 
                 _lose()
+                obs = self.get_observation()
                 return obs, self.done, self.won
         # otherwise, enemies that collided are 'dead'
         else:
@@ -148,6 +147,8 @@ class GameMap:
         self.player.tick()
         for enemy in self.enemies: 
             enemy.tick()
+        
+        obs = self.get_observation()
 
         return obs, self.done, self.won
     
