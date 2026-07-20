@@ -8,6 +8,7 @@ from src.map import Coord, Direction
 
 RUSH_MODE_NAME = "rush"
 IN_DANGER_MODE_NAME = "in_danger"
+GREEDY_MODE_NAME = "greedy"
 BIG_PACMAN_MODE_NAME = "big_pacman"
 
 # "within the 3 units" -> radius of the pellet search perimeter around Pacman.
@@ -40,6 +41,8 @@ def request_action(observation: Observation) -> Direction:
         action = rush_state_logic(observation)
     elif player_mode == IN_DANGER_MODE_NAME:
         action = in_danger_state_logic(observation)
+    elif player_mode == GREEDY_MODE_NAME:
+        action = greedy_state_logic(observation)
     elif player_mode == BIG_PACMAN_MODE_NAME:
         action = super_pacman_state_logic(observation)
     else:
@@ -185,7 +188,15 @@ def is_ghost_nearby(observation:Observation, danger_dist: int = 3) -> bool:
 
 
 # --------------------------------------------------------------------------- #
-# In danger state
+# Greedy state
+# --------------------------------------------------------------------------- #
+
+def greedy_state_logic(observation: Observation) -> Direction:
+    return None
+
+
+# --------------------------------------------------------------------------- #
+# Super pacman state
 # --------------------------------------------------------------------------- #
 
 def super_pacman_state_logic(observation: Observation) -> Direction:
