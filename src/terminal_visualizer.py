@@ -11,6 +11,7 @@ import time
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from src.entity import Player
     from src.game import GameMap, Observation
 
 PLAYER_CHARS = {
@@ -23,9 +24,15 @@ PLAYER_CHARS = {
 
 WALL_CHAR = "▪"
 PELLET_CHAR = "."
+POWER_PELLET_CHAR = "O"
+DEAD_ENEMY_CHAR = "X"
 
 RESET = "\033[0m"
+COLOR_WALL = "\033[94m"  # bright blue
 COLOR_PLAYER = "\033[93m"  # bright yellow
+COLOR_PLAYER_WARNING = "\033[38;5;208m"  # orange
+COLOR_ENEMY_FRIGHTENED = "\033[35m"  # purple / magenta
+COLOR_DEAD = "\033[90m"  # bright black / grey
 ENEMY_COLORS = (
     "\033[91m",  # red
     "\033[96m",  # cyan
@@ -33,9 +40,16 @@ ENEMY_COLORS = (
     "\033[95m",  # pink (bright magenta)
 )
 
+WARNING_FRAMES = 6
+
 
 def _colored(text: str, color: str) -> str:
     return f"{color}{text}{RESET}"
+
+
+def _oscillate(countdown: int, color_a: str, color_b: str) -> str:
+    """Alternate between two colors each frame while a countdown is running."""
+    return color_a if countdown % 2 == 0 else color_b
 
 
 def clear_terminal() -> None:
@@ -101,24 +115,62 @@ class TerminalGameVisualizer:
                 row.append(grid[x][y])
             print("".join(row))
 
+    def _player_color(self, player: Player) -> str:
+        countdown = player.get_super_pacman_countdown()
+        if player.is_super_pacman_mode() and countdown <= WARNING_FRAMES:
+            return _oscillate(countdown, COLOR_PLAYER, COLOR_PLAYER_WARNING)
+        return COLOR_PLAYER
+
+    def _wall_color(self, *, super_pacman: bool, super_countdown: int) -> str:
+        if not super_pacman:
+            return COLOR_WALL
+        if super_countdown <= WARNING_FRAMES:
+            return _oscillate(super_countdown, COLOR_ENEMY_FRIGHTENED, COLOR_WALL)
+        return COLOR_ENEMY_FRIGHTENED
+
     def _build_grid(self, observation: Observation) -> list[list[str]]:
         game_map = observation.map
         grid = [[" " for _ in range(game_map.size_y)] for _ in range(game_map.size_x)]
+        super_pacman = observation.player.is_super_pacman_mode()
+        super_countdown = observation.player.get_super_pacman_countdown()
+        wall_color = self._wall_color(
+            super_pacman=super_pacman, super_countdown=super_countdown
+        )
 
         for x in range(game_map.size_x):
             for y in range(game_map.size_y):
                 if game_map.wall_locs[x][y]:
-                    grid[x][y] = WALL_CHAR
+                    grid[x][y] = _colored(WALL_CHAR, wall_color)
+                elif game_map.power_pellet_locs[x][y]:
+                    grid[x][y] = POWER_PELLET_CHAR
                 elif game_map.pellet_locs[x][y]:
                     grid[x][y] = PELLET_CHAR
 
         player_x, player_y = observation.player.coord
         player_char = PLAYER_CHARS.get(observation.player.dir.name, "C")
-        grid[player_x][player_y] = _colored(player_char, COLOR_PLAYER)
+        grid[player_x][player_y] = _colored(player_char, self._player_color(observation.player))
 
         for enemy in observation.enemies:
             enemy_x, enemy_y = enemy.coord
-            color = ENEMY_COLORS[enemy.enemy_id % len(ENEMY_COLORS)]
+            original = ENEMY_COLORS[enemy.enemy_id % len(ENEMY_COLORS)]
+
+            if enemy.is_dead():
+                revive_countdown = enemy.get_revive_countdown()
+                if revive_countdown <= WARNING_FRAMES:
+                    color = _oscillate(revive_countdown, COLOR_DEAD, original)
+                else:
+                    color = COLOR_DEAD
+                grid[enemy_x][enemy_y] = _colored(DEAD_ENEMY_CHAR, color)
+                continue
+
+            if super_pacman:
+                if super_countdown <= WARNING_FRAMES:
+                    color = _oscillate(super_countdown, COLOR_ENEMY_FRIGHTENED, original)
+                else:
+                    color = COLOR_ENEMY_FRIGHTENED
+            else:
+                color = original
+
             grid[enemy_x][enemy_y] = _colored(str(enemy.enemy_id), color)
 
         return grid
