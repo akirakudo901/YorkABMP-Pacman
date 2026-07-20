@@ -12,7 +12,7 @@ class TestBigPacmanAI(unittest.TestCase):
         This ensures tests run quickly without spinning up the full game engine runtime.
         """
         self.map = Map(size_x=5, size_y=5)
-
+    
     # =========================================================================
     # 1. Mode Trigger Tests (State Transition Logic)
     # =========================================================================
