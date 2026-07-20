@@ -212,4 +212,4 @@ class Map:
                         f"Expected {cls.WALL_CHAR!r}, {cls.PELLET_CHAR!r}, or {cls.EMPTY_CHAR!r}."
                     )
 
-        return Map(size_x=size_x, size_y=size_y, walls=walls, pellets=pellets)
+        return Map(size_x, size_y, walls, pellets, power_pellets)
