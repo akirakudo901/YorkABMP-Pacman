@@ -76,7 +76,7 @@ def rush_state_logic(observation: Observation) -> Direction:
         return Direction.NEUTRAL  # fully boxed in (should not happen on a real map)
 
     # Score every valid direction by how many pellets its path holds within 3 units.
-    scores = {d: pellet_in_distance(observation, coord, d) for d in valid_dirs}
+    scores = {d: pellet_in_distance(observation, coord, d) for d in Direction}
     best_score = max(scores.values())
 
     # Trigger condition 2: if going straight would hit a wall, we MUST turn.
