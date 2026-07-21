@@ -3,6 +3,8 @@ from src.map import Map
 from src.entity import Player, Enemy
 from src.game import Observation
 from src.rules import request_action, IN_DANGER_MODE_NAME, RUSH_MODE_NAME
+# The counter-hunting tests refer to the greedy/economic macro-state as ECONOMIC_MODE_NAME.
+from src.rules import GREEDY_MODE_NAME as ECONOMIC_MODE_NAME
 
 class TestInDangerTransition(unittest.TestCase):
 

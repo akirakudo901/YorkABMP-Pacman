@@ -61,6 +61,9 @@ class Player(Entity):
         self.super_pacman_len = super_pacman_len
         self.super_pacman_countdown = 0
         self.mode = "" # mode to use for finite state machine-style mode switching
+        # Elapsed time in the current greedy/super state, read by the mode switch's
+        # counter-hunting rules. Wiring its per-tick lifecycle is behavior/teammate work.
+        self.state_timer = 0
 
         self._validate_super_pacman_length()
     

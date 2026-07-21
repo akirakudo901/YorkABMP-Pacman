@@ -1,5 +1,5 @@
 import unittest
-from src.map import Map
+from src.map import Map, Direction
 from src.entity import Player, Enemy
 from src.game import Observation
 from src.rules import request_action, RUSH_MODE_NAME, BIG_PACMAN_MODE_NAME
@@ -81,8 +81,7 @@ class TestBigPacmanAI(unittest.TestCase):
         action = request_action(obs)
         
         # Assert that the AI selects the optimal path towards the closer ghost.
-        # Note: Replace "RIGHT" with your project's specific directional constant or enum (e.g., Direction.RIGHT)
-        self.assertEqual(action, "RIGHT")
+        self.assertEqual(action, Direction.RIGHT)
 
 if __name__ == '__main__':
     unittest.main()

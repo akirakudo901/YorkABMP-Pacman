@@ -128,7 +128,11 @@ class Map:
         coords = [c for c in coords if self.can_move(c)]
         self._set_grid_state(coords, True,  self.power_pellet_locs)
         self._set_grid_state(coords, False,       self.pellet_locs)
-    
+
+    def add_big_pellet(self, x: int, y: int) -> None:
+        """Convenience wrapper: place a single power ("big") pellet at (x, y)."""
+        self.add_power_pellets([(x, y)])
+
     def remove_pellets(self, coords: list[Coord]) -> None:
         """Remove all pellets, normal or power."""
         self._set_grid_state(coords, False, self.pellet_locs)
