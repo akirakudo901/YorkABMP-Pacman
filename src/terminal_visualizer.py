@@ -28,7 +28,8 @@ POWER_PELLET_CHAR = "O"
 DEAD_ENEMY_CHAR = "X"
 
 RESET = "\033[0m"
-COLOR_WALL = "\033[94m"  # bright blue
+COLOR_WALL = "\033[92m"  # bright green
+COLOR_WALL_SUPER = "\033[93m"  # bright yellow
 COLOR_PLAYER = "\033[93m"  # bright yellow
 COLOR_PLAYER_WARNING = "\033[38;5;208m"  # orange
 COLOR_ENEMY_FRIGHTENED = "\033[35m"  # purple / magenta
@@ -207,8 +208,8 @@ class TerminalGameVisualizer:
         if not super_pacman:
             return COLOR_WALL
         if super_countdown <= WARNING_FRAMES:
-            return _oscillate(super_countdown, COLOR_ENEMY_FRIGHTENED, COLOR_WALL)
-        return COLOR_ENEMY_FRIGHTENED
+            return _oscillate(super_countdown, COLOR_WALL_SUPER, COLOR_WALL)
+        return COLOR_WALL_SUPER
 
     def _build_grid(self, observation: Observation) -> list[list[str]]:
         game_map = observation.map
