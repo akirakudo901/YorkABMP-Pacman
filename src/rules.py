@@ -157,7 +157,7 @@ def in_danger_state_logic(observation: Observation) -> Direction:
         target = d.move_towards(player_pos)
         if observation.map.can_move(target):
             valid_dirs.append(d)
-            min_ghost_dist = float('-inf')
+            min_ghost_dist = float('inf')
             for enemy in enemies:
                 if not enemy.is_dead():
                     dist = get_distance(target, enemy.coord)
