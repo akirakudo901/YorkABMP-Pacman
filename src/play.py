@@ -2,7 +2,6 @@
 File for playing a game!
 """
 
-import json
 from pathlib import Path
 
 from src.action_requester.precompute_shortest_path import GroupedShortestPathMap
@@ -33,17 +32,13 @@ def make_game(
     map = Map.map_from_ascii(map_ascii)
 
     if use_best_path_ghost_ai:
-        precomputed_path = Path(PRECOMPUTED_DIR) / f"{Path(map_file_path).stem}_precomputed.json"
-        # if pre-existing, load
+        precomputed_path = Path(PRECOMPUTED_DIR) / f"{Path(map_file_path).stem}_precomputed.npz"
         if precomputed_path.is_file():
-            with open(precomputed_path, 'r') as f:
-                content = json.load(f)
-            precomputed_map = GroupedShortestPathMap.from_json(content)
+            precomputed_map = GroupedShortestPathMap.load(precomputed_path)
         else:
+            precomputed_path.parent.mkdir(parents=True, exist_ok=True)
             precomputed_map = GroupedShortestPathMap(map)
-            precomputed_json = precomputed_map.to_json()
-            with open(precomputed_path, 'w') as f:
-                json.dump(precomputed_json, f)
+            precomputed_map.save(precomputed_path)
         
         ghost_ai_cls = lambda: ShortestPathGhostAI(precomputed_map)
    
