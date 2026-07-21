@@ -63,7 +63,7 @@ def make_game(
     
     game_loop(map=map, player=player, enemies=enemies, delay_ms=200, visualizer=VIS_FORMAT)
 
-def game_small_grid(control_player: bool=False):
+def game_small_grid(control_player: bool=False, use_best_path_ghost_ai: bool=True):
     FILE = "maps/9x9grid.txt"
     PLAYER_INIT_COORD = (0,0)
     ENEMY_INIT_COORDS = [
@@ -71,18 +71,20 @@ def game_small_grid(control_player: bool=False):
         # (8,8)
     ]
 
-    make_game(FILE, PLAYER_INIT_COORD, ENEMY_INIT_COORDS, control_player=control_player)
+    make_game(FILE, PLAYER_INIT_COORD, ENEMY_INIT_COORDS, 
+              control_player=control_player, use_best_path_ghost_ai=use_best_path_ghost_ai)
 
-def game_original_pacman(control_player: bool=False):
+def game_original_pacman(control_player: bool=False, use_best_path_ghost_ai: bool=True):
     FILE = "maps/orig_pacman_with_power_pellet.txt"
     PLAYER_INIT_COORD = (0,0)
     ENEMY_INIT_COORDS = [(0,28), (25,28)]
 
-    make_game(FILE, PLAYER_INIT_COORD, ENEMY_INIT_COORDS, control_player=control_player)
+    make_game(FILE, PLAYER_INIT_COORD, ENEMY_INIT_COORDS, 
+              control_player=control_player, use_best_path_ghost_ai=use_best_path_ghost_ai)
 
 
 if __name__ == "__main__":
     # You can play the small grid version of the game!
     # game_small_grid(control_player=False)
     # Or the original pacman game (no warp or power pellets)
-    game_original_pacman(control_player=False)
+    game_original_pacman(control_player=False, use_best_path_ghost_ai=True)
