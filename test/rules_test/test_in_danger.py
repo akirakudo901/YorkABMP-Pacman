@@ -69,17 +69,17 @@ class TestInDangerTransition(unittest.TestCase):
     # =========================================================================
 
     # (Inverse Counter-Hunting Boundaries)
-    def test_economic_at_28s_with_close_ghost_remains_economic(self):
+    def test_economic_with_2_frames_left_and_close_ghost_remains_economic(self):
         """
-        [Counter-Hunting Boundary: T = 28s, Dist <= 2]
-        Verifies the aggressive economic retention strategy. At 28 seconds, if a ghost 
-        is within extreme close proximity (Distance <= 2), Pacman assumes a high probability 
-        of consuming the threat/pellet and safely stays in ECONOMIC mode.
+        [Counter-Hunting Boundary: remaining = 2, Dist <= 2]
+        Verifies the aggressive economic retention strategy. With 2 super-pacman
+        frames left, if a ghost is within extreme close proximity (Distance <= 2),
+        Pacman assumes a high probability of consuming the threat/pellet and safely
+        stays in ECONOMIC mode.
         """
         player = Player(init_coord=(0, 0), action_requester=None)
         player.set_mode(ECONOMIC_MODE_NAME)
-        if hasattr(player, 'state_timer'):
-            player.state_timer = 28
+        player.super_pacman_countdown = 2
             
         # Ghost at Distance = 2 -> Should trigger aggressive retention
         enemy = Enemy(init_coord=(2, 0), action_requester=None, enemy_id=0)
@@ -88,17 +88,17 @@ class TestInDangerTransition(unittest.TestCase):
         
         self.assertEqual(player.get_mode(), ECONOMIC_MODE_NAME)
 
-    def test_economic_at_28s_with_dist_3_switches_to_in_danger(self):
+    def test_economic_with_2_frames_left_and_dist_3_switches_to_in_danger(self):
         """
-        [Counter-Hunting Boundary: T = 28s, Dist = 3]
-        Verifies the strategic retreat fallback. At 28 seconds, if a ghost is at an awkward 
-        tactical distance (Distance = 3), Pacman flags it as an unviable counter-hunt opportunity 
-        and preemptively switches to IN_DANGER mode.
+        [Counter-Hunting Boundary: remaining = 2, Dist = 3]
+        Verifies the strategic retreat fallback. With 2 super-pacman frames left,
+        if a ghost is at an awkward tactical distance (Distance = 3), Pacman flags
+        it as an unviable counter-hunt opportunity and preemptively switches to
+        IN_DANGER mode.
         """
         player = Player(init_coord=(0, 0), action_requester=None)
         player.set_mode(ECONOMIC_MODE_NAME)
-        if hasattr(player, 'state_timer'):
-            player.state_timer = 28
+        player.super_pacman_countdown = 2
             
         # Ghost at Distance = 3 -> Tactical ambiguity triggers safety retreat
         enemy = Enemy(init_coord=(3, 0), action_requester=None, enemy_id=0)
@@ -107,17 +107,16 @@ class TestInDangerTransition(unittest.TestCase):
         
         self.assertEqual(player.get_mode(), IN_DANGER_MODE_NAME)
 
-    def test_economic_at_29s_with_dist_1_remains_economic(self):
+    def test_economic_with_1_frame_left_and_dist_1_remains_economic(self):
         """
-        [Counter-Hunting Boundary: T = 29s, Dist = 1]
-        Verifies immediate close-quarters aggression. At 29 seconds, a ghost right next 
-        to Pacman (Distance = 1) is targeted for an instant capture, maintaining the active 
-        ECONOMIC state execution.
+        [Counter-Hunting Boundary: remaining = 1, Dist = 1]
+        Verifies immediate close-quarters aggression. With 1 super-pacman frame
+        left, a ghost right next to Pacman (Distance = 1) is targeted for an
+        instant capture, maintaining the active ECONOMIC state execution.
         """
         player = Player(init_coord=(0, 0), action_requester=None)
         player.set_mode(ECONOMIC_MODE_NAME)
-        if hasattr(player, 'state_timer'):
-            player.state_timer = 29
+        player.super_pacman_countdown = 1
             
         # Ghost at Distance = 1 -> Direct contact option preserves economic farming
         enemy = Enemy(init_coord=(1, 0), action_requester=None, enemy_id=0)
@@ -126,17 +125,18 @@ class TestInDangerTransition(unittest.TestCase):
         
         self.assertEqual(player.get_mode(), ECONOMIC_MODE_NAME)
 
-    def test_economic_at_29s_with_dist_2_or_3_switches_to_in_danger(self):
+    def test_economic_with_1_frame_left_and_dist_2_or_3_switches_to_in_danger(self):
         """
-        [Counter-Hunting Boundary: T = 29s, Dist = 2 and 3]
-        Verifies perimeter defense activation right before final timeout. At 29 seconds, 
-        ghost distances of 2 or 3 cannot guarantee an instant consume loop, forcing an 
-        immediate switch to IN_DANGER mode for defense.
+        [Counter-Hunting Boundary: remaining = 1, Dist = 2 and 3]
+        Verifies perimeter defense activation right before final timeout. With 1
+        super-pacman frame left, ghost distances of 2 or 3 cannot guarantee an
+        instant consume loop, forcing an immediate switch to IN_DANGER mode for
+        defense.
         """
         # Test Sub-case: Distance = 2
         player_d2 = Player(init_coord=(0, 0), action_requester=None)
         player_d2.set_mode(ECONOMIC_MODE_NAME)
-        if hasattr(player_d2, 'state_timer'): player_d2.state_timer = 29
+        player_d2.super_pacman_countdown = 1
         enemy_d2 = Enemy(init_coord=(2, 0), action_requester=None, enemy_id=0)
         obs_d2 = Observation(map=self.map, player=player_d2, enemies=[enemy_d2])
         request_action(obs_d2)
@@ -145,22 +145,22 @@ class TestInDangerTransition(unittest.TestCase):
         # Test Sub-case: Distance = 3
         player_d3 = Player(init_coord=(0, 0), action_requester=None)
         player_d3.set_mode(ECONOMIC_MODE_NAME)
-        if hasattr(player_d3, 'state_timer'): player_d3.state_timer = 29
+        player_d3.super_pacman_countdown = 1
         enemy_d3 = Enemy(init_coord=(3, 0), action_requester=None, enemy_id=0)
         obs_d3 = Observation(map=self.map, player=player_d3, enemies=[enemy_d3])
         request_action(obs_d3)
         self.assertEqual(player_d3.get_mode(), IN_DANGER_MODE_NAME)
 
-    def test_economic_at_29s_with_safe_distance_remains_economic(self):
+    def test_economic_with_1_frame_left_and_safe_distance_remains_economic(self):
         """
-        [Counter-Hunting Boundary: T = 29s, Dist > 3]
-        Ensures that when ghosts are completely out of range (Distance > 3), Pacman naturally 
-        keeps clearing resources in ECONOMIC mode without false defensive alerts.
+        [Counter-Hunting Boundary: remaining = 1, Dist > 3]
+        Ensures that when ghosts are completely out of range (Distance > 3), Pacman
+        naturally keeps clearing resources in ECONOMIC mode without false defensive
+        alerts.
         """
         player = Player(init_coord=(0, 0), action_requester=None)
         player.set_mode(ECONOMIC_MODE_NAME)
-        if hasattr(player, 'state_timer'):
-            player.state_timer = 29
+        player.super_pacman_countdown = 1
             
         # Ghost far away at Distance = 4
         enemy = Enemy(init_coord=(4, 0), action_requester=None, enemy_id=0)
@@ -169,30 +169,30 @@ class TestInDangerTransition(unittest.TestCase):
         
         self.assertEqual(player.get_mode(), ECONOMIC_MODE_NAME)
 
-    def test_economic_to_in_danger_at_and_past_30s_timeout(self):
+    def test_economic_to_in_danger_when_super_expired(self):
         """
-        [Standard Baseline Boundary: T >= 30s, Dist <= 3]
-        Validates that once the temporal safety threshold is breached (T = 30s or 31s), 
-        the aggressive retention logic expires. Any ghost within the standard radius 
+        [Standard Baseline Boundary: remaining = 0, Dist <= 3]
+        Validates that once super pacman has expired (countdown = 0), the aggressive
+        retention logic expires. Any ghost within the standard radius
         (Distance <= 3) universally triggers a transition to IN_DANGER mode.
         """
-        # Test Sub-case: T = 30s, Distance = 3
-        player_t30 = Player(init_coord=(0, 0), action_requester=None)
-        player_t30.set_mode(ECONOMIC_MODE_NAME)
-        if hasattr(player_t30, 'state_timer'): player_t30.state_timer = 30
-        enemy_t30 = Enemy(init_coord=(3, 0), action_requester=None, enemy_id=0)
-        obs_t30 = Observation(map=self.map, player=player_t30, enemies=[enemy_t30])
-        request_action(obs_t30)
-        self.assertEqual(player_t30.get_mode(), IN_DANGER_MODE_NAME)
+        # Test Sub-case: remaining = 0, Distance = 3
+        player_expired = Player(init_coord=(0, 0), action_requester=None)
+        player_expired.set_mode(ECONOMIC_MODE_NAME)
+        player_expired.super_pacman_countdown = 0
+        enemy_expired = Enemy(init_coord=(3, 0), action_requester=None, enemy_id=0)
+        obs_expired = Observation(map=self.map, player=player_expired, enemies=[enemy_expired])
+        request_action(obs_expired)
+        self.assertEqual(player_expired.get_mode(), IN_DANGER_MODE_NAME)
 
-        # Test Sub-case: T = 31s, Distance = 2
-        player_t31 = Player(init_coord=(0, 0), action_requester=None)
-        player_t31.set_mode(ECONOMIC_MODE_NAME)
-        if hasattr(player_t31, 'state_timer'): player_t31.state_timer = 31
-        enemy_t31 = Enemy(init_coord=(2, 0), action_requester=None, enemy_id=0)
-        obs_t31 = Observation(map=self.map, player=player_t31, enemies=[enemy_t31])
-        request_action(obs_t31)
-        self.assertEqual(player_t31.get_mode(), IN_DANGER_MODE_NAME)
+        # Test Sub-case: remaining = 0, Distance = 2
+        player_expired2 = Player(init_coord=(0, 0), action_requester=None)
+        player_expired2.set_mode(ECONOMIC_MODE_NAME)
+        player_expired2.super_pacman_countdown = 0
+        enemy_expired2 = Enemy(init_coord=(2, 0), action_requester=None, enemy_id=0)
+        obs_expired2 = Observation(map=self.map, player=player_expired2, enemies=[enemy_expired2])
+        request_action(obs_expired2)
+        self.assertEqual(player_expired2.get_mode(), IN_DANGER_MODE_NAME)
 
 if __name__ == '__main__':
     unittest.main()

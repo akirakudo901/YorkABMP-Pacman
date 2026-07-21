@@ -178,6 +178,7 @@ def in_danger_state_logic(observation: Observation) -> Direction:
     else:
         return best_dir
 
+
 def get_distance(x, y):
     return abs(x[0] - y[0]) + abs(x[1] - y[1])
 
@@ -226,32 +227,33 @@ def is_big_pellet_near_by(
 
 
 def decide_mode(observation: Observation) -> str:
-    """Classify the observation into a mode. Timer-sensitive counter-hunting rules apply
+    """Classify the observation into a mode. Countdown-sensitive counter-hunting rules apply
     only when coming from the greedy family (greedy / big_pacman); from rush / in_danger /
-    unset we use the simple rules. `state_timer` is the elapsed time in the greedy/super
-    state (28 -> 29 -> 30), matching the boundary tests.
+    unset we use the simple rules. `super_pacman_countdown` is the remaining frames of
+    super pacman mode (2 -> 1 -> 0), matching the boundary tests.
     """
     player = observation.player
     current = player.get_mode()
     is_super = player.is_super_pacman_mode()
-    t = getattr(player, "state_timer", 0)             # elapsed time in greedy/super state
+    remaining = player.get_super_pacman_countdown()  # frames left in super pacman mode
     gd = nearest_ghost_distance(observation)          # None if no living ghost
     ghost_near = gd is not None and gd <= DANGER_RADIUS
     big_near = is_big_pellet_near_by(observation)
 
-    # --- From the greedy family: timer-sensitive counter-hunting (T = 28 / 29 / >=30) ---
+    # --- From the greedy family: countdown-sensitive counter-hunting ---
     if current in (GREEDY_MODE_NAME, BIG_PACMAN_MODE_NAME):
         if not ghost_near:
             # No threat: stay in the greedy macro-state. (Demoting back to RUSH when no
             # big pellet remains is flowchart behavior left for later / not yet tested.)
             return GREEDY_MODE_NAME
-        if is_super:
-            return BIG_PACMAN_MODE_NAME   # empowered + ghost near -> hunt it
-        if t <= 28:          # plenty of time: aggressive retention
+        # Already hunting and still empowered: keep hunting.
+        if current == BIG_PACMAN_MODE_NAME and is_super:
+            return BIG_PACMAN_MODE_NAME
+        if remaining >= 2:   # plenty of time left: aggressive retention
             return GREEDY_MODE_NAME if gd <= 2 else IN_DANGER_MODE_NAME
-        if t == 29:          # near timeout: only an adjacent ghost is worth staying for
+        if remaining == 1:   # near timeout: only an adjacent ghost is worth staying for
             return GREEDY_MODE_NAME if gd == 1 else IN_DANGER_MODE_NAME
-        return IN_DANGER_MODE_NAME   # t >= 30: timer expired -> flee
+        return IN_DANGER_MODE_NAME   # remaining == 0: super expired -> flee
 
     # --- From rush / in_danger / unset: simple rules ---
     if is_super:
