@@ -9,11 +9,17 @@ from src.map import Coord, Direction
 
 RUSH_MODE_NAME = "rush"
 IN_DANGER_MODE_NAME = "in_danger"
-GREEDY_MODE_NAME = "greedy"
+# The "Unthreatened Greedy" / Economic macro-state (go eat big pellets).
+GREEDY_MODE_NAME = "UNTHREATENED_GREEDY"
 BIG_PACMAN_MODE_NAME = "big_pacman"
 
 # "within the 3 units" -> radius of the pellet search perimeter around Pacman.
 PELLET_SEARCH_RADIUS = 3
+
+# "Danger threshold: Manhattan distance 3" -> a ghost / big pellet counts as "near by"
+# when within this many units of Pacman.
+DANGER_RADIUS = 3
+BIG_PELLET_RADIUS = 3
 
 # The four real moves (NEUTRAL is not a travel direction).
 MOVE_DIRS = [Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT]
@@ -26,16 +32,10 @@ MOVE_DIRS = [Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT]
 def request_action(observation: Observation) -> Direction:
     player = observation.player
 
-    player_mode = player.get_mode()
-    
-    # initial state: unset, left as empty. Then, set to default which is rush
-    if player_mode == "":
-        player.set_mode(RUSH_MODE_NAME)
-        player_mode = player.get_mode()
-
-    # Switch between "modes" based on triggers!
-    if is_ghost_nearby(observation, danger_dist=3):
-        player.set_mode(IN_DANGER_MODE_NAME)
+    # Switch between "modes" based on triggers! There is no default mode: every step we
+    # re-observe the environment and classify into a mode (see decide_mode).
+    player_mode = decide_mode(observation)
+    player.set_mode(player_mode)
 
     # we run the logic under the different states
     if player_mode == RUSH_MODE_NAME:
@@ -178,6 +178,7 @@ def in_danger_state_logic(observation: Observation) -> Direction:
     else:
         return best_dir
 
+
 def get_distance(x, y):
     return abs(x[0] - y[0]) + abs(x[1] - y[1])
 
@@ -191,8 +192,79 @@ def is_ghost_nearby(observation:Observation, danger_dist: int = 3) -> bool:
             dist = get_distance(player_pos, ghost_pos)
             if dist < danger_dist:
                 return True
-    
+
     return False
+
+
+# --------------------------------------------------------------------------- #
+# Mode switch -- classify the current observation into one of the four modes,
+# following the "IN_DANGER Transition Logic" flowchart.
+# --------------------------------------------------------------------------- #
+
+def nearest_ghost_distance(observation: Observation) -> int | None:
+    """Manhattan distance to the closest LIVING ghost, or None if none are alive."""
+    dists = [
+        get_distance(observation.player.coord, e.coord)
+        for e in observation.enemies
+        if not e.is_dead()
+    ]
+    return min(dists) if dists else None
+
+
+def is_big_pellet_near_by(
+    observation: Observation, radius: int = BIG_PELLET_RADIUS
+) -> bool:
+    """State variable `is_big_pellet`: True if a power ("big") pellet exists within
+    Manhattan `radius` of the player."""
+    px, py = observation.player.coord
+    coords = [
+        (px + dx, py + dy)
+        for dx in range(-radius, radius + 1)
+        for dy in range(-radius, radius + 1)
+        if abs(dx) + abs(dy) <= radius
+    ]
+    return any(observation.map.have_power_pellets(coords))
+
+
+def decide_mode(observation: Observation) -> str:
+    """Classify the observation into a mode. Countdown-sensitive counter-hunting rules apply
+    only when coming from the greedy family (greedy / big_pacman); from rush / in_danger /
+    unset we use the simple rules. `super_pacman_countdown` is the remaining frames of
+    super pacman mode (2 -> 1 -> 0), matching the boundary tests.
+    """
+    player = observation.player
+    current = player.get_mode()
+    is_super = player.is_super_pacman_mode()
+    remaining = player.get_super_pacman_countdown()  # frames left in super pacman mode
+    gd = nearest_ghost_distance(observation)          # None if no living ghost
+    ghost_near = gd is not None and gd <= DANGER_RADIUS
+    big_near = is_big_pellet_near_by(observation)
+
+    # --- From the greedy family: countdown-sensitive counter-hunting ---
+    if current in (GREEDY_MODE_NAME, BIG_PACMAN_MODE_NAME):
+        if not ghost_near:
+            # No threat: stay in the greedy macro-state. (Demoting back to RUSH when no
+            # big pellet remains is flowchart behavior left for later / not yet tested.)
+            return GREEDY_MODE_NAME
+        # Already hunting and still empowered: keep hunting.
+        if current == BIG_PACMAN_MODE_NAME and is_super:
+            return BIG_PACMAN_MODE_NAME
+        if remaining >= 2:   # plenty of time left: aggressive retention
+            return GREEDY_MODE_NAME if gd <= 2 else IN_DANGER_MODE_NAME
+        if remaining == 1:   # near timeout: only an adjacent ghost is worth staying for
+            return GREEDY_MODE_NAME if gd == 1 else IN_DANGER_MODE_NAME
+        return IN_DANGER_MODE_NAME   # remaining == 0: super expired -> flee
+
+    # --- From rush / in_danger / unset: simple rules ---
+    if is_super:
+        if ghost_near:
+            return BIG_PACMAN_MODE_NAME
+        return GREEDY_MODE_NAME if big_near else RUSH_MODE_NAME
+    if ghost_near:
+        return IN_DANGER_MODE_NAME
+    if big_near:
+        return GREEDY_MODE_NAME
+    return RUSH_MODE_NAME
 
 
 # --------------------------------------------------------------------------- #
