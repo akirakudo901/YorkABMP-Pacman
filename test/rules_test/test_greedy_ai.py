@@ -2,10 +2,7 @@ import unittest
 from src.map import Map
 from src.entity import Player, Enemy
 from src.game import Observation
-from src.rules import request_action, RUSH_MODE_NAME, IN_DANGER_MODE_NAME
-
-# Constant for the refactored parent macro-state
-GREEDY_MODE_NAME = "UNTHREATENED_GREEDY" 
+from src.rules import request_action, GREEDY_MODE_NAME, IN_DANGER_MODE_NAME, RUSH_MODE_NAME
 
 class TestGreedyModeTransitions(unittest.TestCase):
 
@@ -28,7 +25,7 @@ class TestGreedyModeTransitions(unittest.TestCase):
         player.set_mode(RUSH_MODE_NAME)
         
         # Place a big pellet at (3, 0) -> Manhattan distance: |0-3| + |0-0| = 3
-        self.map.add_big_pellet(x=3, y=0) 
+        self.map.add_power_pellets([(3,0)]) 
         
         # Place a ghost safely out of range
         enemy = Enemy(init_coord=(4, 4), action_requester=None, enemy_id=0)
@@ -50,7 +47,7 @@ class TestGreedyModeTransitions(unittest.TestCase):
         player.set_mode(RUSH_MODE_NAME)
         
         # Place a big pellet at (4, 0) -> Manhattan distance = 4
-        self.map.add_big_pellet(x=4, y=0)
+        self.map.add_power_pellets([(4,0)])
         enemy = Enemy(init_coord=(4, 4), action_requester=None, enemy_id=0)
         
         obs = Observation(map=self.map, player=player, enemies=[enemy])
@@ -69,7 +66,7 @@ class TestGreedyModeTransitions(unittest.TestCase):
         player.set_mode(RUSH_MODE_NAME)
         
         # Big pellet is close at (2, 0), but a ghost is threatening at (0, 2)
-        self.map.add_big_pellet(x=2, y=0)
+        self.map.add_power_pellets([(2,0)])
         enemy = Enemy(init_coord=(0, 2), action_requester=None, enemy_id=0)
         
         obs = Observation(map=self.map, player=player, enemies=[enemy])
@@ -96,7 +93,7 @@ class TestGreedyModeTransitions(unittest.TestCase):
         # Threat cleared: Ghost moves to (4, 0) -> Distance = 4
         enemy = Enemy(init_coord=(4, 0), action_requester=None, enemy_id=0)
         # Target still viable: Big pellet is at (0, 2) -> Distance = 2
-        self.map.add_big_pellet(x=0, y=2)
+        self.map.add_power_pellets([(0,2)])
         
         obs = Observation(map=self.map, player=player, enemies=[enemy])
         request_action(obs)
