@@ -58,20 +58,27 @@ class SingleShortestPathMap:
         frontier: deque[tuple[Coord, int, int]] = deque([init_entry])
         visited = np.zeros(self.distance_query.shape, dtype=bool)
 
+        # we do a standard breadth-first search, so for each non-visited location, path_len is the shortest!
         while frontier:
+            # expand the node at the top of the queue / frontier
             coord, parent_dir_code, path_len = frontier.pop()
             c_x, c_y = coord
+            # skip if already visited
             if visited[c_x, c_y]:
                 continue
+            # otherwise, we got here for the first time; note the path length to here + which way we came from
             self.distance_query[c_x, c_y] = path_len
             self.direction_query[c_x, c_y] = parent_dir_code
             visited[c_x, c_y] = True
+            # we then add every neighbor to the frontier to investigate next (add at end of queue, since breadth-first)
             for d in Direction:
                 if d == Direction.NEUTRAL:
                     continue
                 n_x, n_y = d.move_towards(coord)
+                # skip if it's a wall
                 if not map.can_move((n_x, n_y)):
                     continue
+                # skip if it is already visited
                 if visited[n_x, n_y]:
                     continue
                 frontier.appendleft(((n_x, n_y), _DIR_TO_CODE[d.opposite()], path_len + 1))
