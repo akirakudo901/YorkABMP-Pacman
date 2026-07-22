@@ -2,28 +2,48 @@
 File for playing a game!
 """
 
+from pathlib import Path
+
+from src.action_requester.precompute_shortest_path import GroupedShortestPathMap
 from src.entity import Enemy, Player
 from src.game import game_loop
 from src.map import Coord, Map
-from src.action_requester.ai import CoordMatchGhostAI, PhoebePlayerAI
+from src.action_requester.ai import CoordMatchGhostAI, PhoebePlayerAI, ShortestPathGhostAI
 from src.action_requester.controller import KeyboardController
 
 KEYBOARD_TIMEOUT_MS = 200
 DELAY_MS = 200
 VIS_FORMAT = "terminal"
 
-DEFAULT_ENEMY_LOOKAHEAD_SIZES = [-3, 3, 1, -1]
+DEFAULT_ENEMY_LOOKAHEAD_SIZES = [-3, 3, 0, 1, -1]
+
+PRECOMPUTED_DIR = r"precomputed_shortest_path"
 
 def make_game(
     map_file_path: str, 
     player_init_coord: Coord,
     enemy_init_coords: list[Coord],
     enemy_lookahead_sizes: list[int]=DEFAULT_ENEMY_LOOKAHEAD_SIZES,
-    control_player: bool=False
+    control_player: bool=False,
+    use_best_path_ghost_ai: bool=True
     ):
     with open(map_file_path, 'r') as f:
         map_ascii = f.read()
     map = Map.map_from_ascii(map_ascii)
+
+    if use_best_path_ghost_ai:
+        precomputed_path = Path(PRECOMPUTED_DIR) / f"{Path(map_file_path).stem}_precomputed.npz"
+        if precomputed_path.is_file():
+            precomputed_map = GroupedShortestPathMap.load(precomputed_path)
+        else:
+            precomputed_path.parent.mkdir(parents=True, exist_ok=True)
+            precomputed_map = GroupedShortestPathMap(map)
+            precomputed_map.save(precomputed_path)
+        
+        ghost_ai_cls = lambda: ShortestPathGhostAI(precomputed_map)
+   
+    else:
+        ghost_ai_cls = CoordMatchGhostAI
 
     if control_player:
         player = Player(
@@ -36,14 +56,14 @@ def make_game(
     enemy_lookahead_sizes = enemy_lookahead_sizes + [0] * len(enemy_init_coords)
     enemy_lookahead_sizes = enemy_lookahead_sizes[:len(enemy_init_coords)]
     enemies = [
-        Enemy(init_coord=coord, action_requester=CoordMatchGhostAI(), 
+        Enemy(init_coord=coord, action_requester=ghost_ai_cls(), 
               enemy_id=i, lookahead_size=lsz)
         for i, (coord, lsz) in enumerate(zip(enemy_init_coords, enemy_lookahead_sizes))
     ]
     
-    game_loop(map=map, player=player, enemies=enemies, delay_ms=200, visualizer=VIS_FORMAT)
+    game_loop(map=map, player=player, enemies=enemies, delay_ms=75, visualizer=VIS_FORMAT)
 
-def game_small_grid(control_player: bool=False):
+def game_small_grid(control_player: bool=False, use_best_path_ghost_ai: bool=True):
     FILE = "maps/9x9grid.txt"
     PLAYER_INIT_COORD = (0,0)
     ENEMY_INIT_COORDS = [
@@ -51,18 +71,20 @@ def game_small_grid(control_player: bool=False):
         # (8,8)
     ]
 
-    make_game(FILE, PLAYER_INIT_COORD, ENEMY_INIT_COORDS, control_player=control_player)
+    make_game(FILE, PLAYER_INIT_COORD, ENEMY_INIT_COORDS, 
+              control_player=control_player, use_best_path_ghost_ai=use_best_path_ghost_ai)
 
-def game_original_pacman(control_player: bool=False):
+def game_original_pacman(control_player: bool=False, use_best_path_ghost_ai: bool=True):
     FILE = "maps/orig_pacman_with_power_pellet.txt"
     PLAYER_INIT_COORD = (0,0)
-    ENEMY_INIT_COORDS = [(0,28), (25,28)]
+    ENEMY_INIT_COORDS = [(0,28), (25,28), (12,16)]
 
-    make_game(FILE, PLAYER_INIT_COORD, ENEMY_INIT_COORDS, control_player=control_player)
+    make_game(FILE, PLAYER_INIT_COORD, ENEMY_INIT_COORDS, 
+              control_player=control_player, use_best_path_ghost_ai=use_best_path_ghost_ai)
 
 
 if __name__ == "__main__":
     # You can play the small grid version of the game!
     # game_small_grid(control_player=False)
     # Or the original pacman game (no warp or power pellets)
-    game_original_pacman(control_player=False)
+    game_original_pacman(control_player=False, use_best_path_ghost_ai=True)

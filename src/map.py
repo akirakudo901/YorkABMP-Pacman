@@ -43,6 +43,20 @@ class Direction(Enum):
         sx, sy = start
         return (sx + dx, sy + dy)
     
+    def opposite(self) -> Direction:
+        if self == Direction.UP:
+            return Direction.DOWN
+        elif self == Direction.DOWN:
+            return Direction.UP
+        elif self == Direction.LEFT:
+            return Direction.RIGHT
+        elif self == Direction.RIGHT:
+            return Direction.LEFT
+        elif self == Direction.NEUTRAL:
+            return Direction.NEUTRAL
+        else:
+            raise ValueError("Unknown Direction")
+    
     @classmethod
     def delta_to_dir(cls, coord: Coord) -> Direction:
         """Return direction from (dx, dy) with one value being non-zero and the other 0."""
