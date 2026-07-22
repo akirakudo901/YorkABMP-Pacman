@@ -15,7 +15,7 @@ KEYBOARD_TIMEOUT_MS = 200
 DELAY_MS = 200
 VIS_FORMAT = "terminal"
 
-DEFAULT_ENEMY_LOOKAHEAD_SIZES = [-3, 3, 1, -1]
+DEFAULT_ENEMY_LOOKAHEAD_SIZES = [-3, 3, 0, 1, -1]
 
 PRECOMPUTED_DIR = r"precomputed_shortest_path"
 
@@ -61,7 +61,7 @@ def make_game(
         for i, (coord, lsz) in enumerate(zip(enemy_init_coords, enemy_lookahead_sizes))
     ]
     
-    game_loop(map=map, player=player, enemies=enemies, delay_ms=200, visualizer=VIS_FORMAT)
+    game_loop(map=map, player=player, enemies=enemies, delay_ms=75, visualizer=VIS_FORMAT)
 
 def game_small_grid(control_player: bool=False, use_best_path_ghost_ai: bool=True):
     FILE = "maps/9x9grid.txt"
@@ -77,7 +77,7 @@ def game_small_grid(control_player: bool=False, use_best_path_ghost_ai: bool=Tru
 def game_original_pacman(control_player: bool=False, use_best_path_ghost_ai: bool=True):
     FILE = "maps/orig_pacman_with_power_pellet.txt"
     PLAYER_INIT_COORD = (0,0)
-    ENEMY_INIT_COORDS = [(0,28), (25,28)]
+    ENEMY_INIT_COORDS = [(0,28), (25,28), (12,16)]
 
     make_game(FILE, PLAYER_INIT_COORD, ENEMY_INIT_COORDS, 
               control_player=control_player, use_best_path_ghost_ai=use_best_path_ghost_ai)
