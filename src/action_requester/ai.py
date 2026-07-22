@@ -6,7 +6,7 @@ import random
 from typing import TYPE_CHECKING
 
 from src.action_requester.precompute_shortest_path import GroupedShortestPathMap
-from src.map import Direction
+from src.map import Coord, Direction, Map
 
 if TYPE_CHECKING:
     from src.game import Observation, Action
@@ -56,6 +56,10 @@ class ShortestPathGhostAI:
             raise Exception("Pass the enemy_id when requesting action to a ghost/enemy.")
         enemy_id: int = context["enemy_id"]
         lookahead_size = context.get("lookahead_size", 0)
+
+        def can_move_in_map(coord: Coord, dir: Direction, map: Map) -> bool:
+            next_coord = dir.move_towards(coord)
+            return map.can_move(next_coord)
         
         myself = observation.enemies[enemy_id]
         player = observation.player
@@ -84,7 +88,8 @@ class ShortestPathGhostAI:
         if player.is_super_pacman_mode():
             valid_dirs = [
                 d for d in Direction 
-                if d not in (best_dir_towards_player, Direction.NEUTRAL)
+                if d not in (best_dir_towards_player, Direction.NEUTRAL) and
+                can_move_in_map(myself.coord, d, observation.map)
             ]
             if valid_dirs:
                 return random.choice(valid_dirs)
